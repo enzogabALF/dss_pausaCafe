@@ -1,4 +1,23 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { getPrismaClient, hasDatabaseUrl } from '@/lib/prisma';
+
+const MOCK_KPI = {
+  date: new Date().toISOString().split('T')[0],
+  totalOrders: 50,
+  totalRevenue: 210000,
+  averageTicket: 4250,
+  digitalSales: 15,
+  totalCost: 67500,
+  operationalCost: 42000,
+  margin: 68.5,
+  occupancyRate: 72,
+  categories: {
+    'Bebidas Calientes': { sales: 2840, margin: 72 },
+    'Bebidas Frías': { sales: 392, margin: 75 },
+    Pasteleria: { sales: 873, margin: 67.9 },
+    Comida: { sales: 739, margin: 62.4 },
+  },
+};
 
 /**
  * GET /api/kpi
@@ -6,23 +25,60 @@ import { NextRequest, NextResponse } from 'next/server';
  */
 export async function GET(req: NextRequest) {
   try {
-    // Datos mock - en producción vendrían de la base de datos
+    if (!hasDatabaseUrl()) {
+      return NextResponse.json(
+        {
+          success: true,
+          data: MOCK_KPI,
+          source: 'mock',
+          timestamp: new Date().toISOString(),
+        },
+        { status: 200 }
+      );
+    }
+
+    let latest = null;
+    try {
+      const prisma = getPrismaClient();
+      latest = await prisma.kpiBase.findFirst({
+        orderBy: { createdAt: 'desc' },
+      });
+    } catch (dbError) {
+      console.warn('DB no disponible para KPI, usando mock:', dbError);
+      return NextResponse.json(
+        {
+          success: true,
+          data: MOCK_KPI,
+          source: 'fallback-mock',
+          timestamp: new Date().toISOString(),
+        },
+        { status: 200 }
+      );
+    }
+
+    if (!latest) {
+      return NextResponse.json(
+        {
+          success: true,
+          data: MOCK_KPI,
+          source: 'mock',
+          timestamp: new Date().toISOString(),
+        },
+        { status: 200 }
+      );
+    }
+
     const kpiData = {
-      date: new Date().toISOString().split('T')[0],
-      totalOrders: 50,
-      totalRevenue: 210000, // $210.000
-      averageTicket: 4250,
-      digitalSales: 15,
-      totalCost: 67500,
-      operationalCost: 42000,
-      margin: 68.5,
-      occupancyRate: 72,
-      categories: {
-        'Bebidas Calientes': { sales: 2840, margin: 72 },
-        'Bebidas Frías': { sales: 392, margin: 75 },
-        'Pastelería': { sales: 873, margin: 67.9 },
-        'Comida': { sales: 739, margin: 62.4 },
-      },
+      date: latest.date.toISOString().split('T')[0],
+      totalOrders: latest.totalOrders,
+      totalRevenue: latest.totalRevenue,
+      averageTicket: latest.averageTicket,
+      digitalSales: latest.digitalSales,
+      totalCost: latest.totalCost,
+      operationalCost: latest.operationalCost,
+      margin: latest.margin,
+      occupancyRate: latest.occupancyRate,
+      categories: JSON.parse(latest.categories || '{}'),
     };
 
     return NextResponse.json(
@@ -50,14 +106,53 @@ export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
 
-    // En producción: guardar en base de datos con Prisma
-    // await prisma.kpiBase.create({ data: body });
+    if (!hasDatabaseUrl()) {
+      return NextResponse.json(
+        {
+          success: true,
+          persisted: false,
+          message: 'Sin DATABASE_URL: KPI aceptado en modo demo (no persistido)',
+          data: body,
+          timestamp: new Date().toISOString(),
+        },
+        { status: 201 }
+      );
+    }
+
+    const prisma = getPrismaClient();
+    const categories =
+      typeof body.categories === 'string'
+        ? body.categories
+        : JSON.stringify(body.categories ?? {});
+
+    const created = await prisma.kpiBase.create({
+      data: {
+        date: body.date ? new Date(body.date) : new Date(),
+        totalOrders: Number(body.totalOrders ?? 0),
+        totalRevenue: Number(body.totalRevenue ?? 0),
+        averageTicket: Number(body.averageTicket ?? 0),
+        digitalSales: Number(body.digitalSales ?? 0),
+        totalCost: Number(body.totalCost ?? 0),
+        operationalCost: Number(body.operationalCost ?? 0),
+        margin: Number(body.margin ?? 0),
+        occupancyRate: Number(body.occupancyRate ?? 0),
+        peakHours:
+          typeof body.peakHours === 'string'
+            ? body.peakHours
+            : JSON.stringify(body.peakHours ?? {}),
+        categories,
+      },
+    });
 
     return NextResponse.json(
       {
         success: true,
+        persisted: true,
         message: 'KPIs guardados correctamente',
-        data: body,
+        data: {
+          ...body,
+          id: created.id,
+        },
         timestamp: new Date().toISOString(),
       },
       { status: 201 }

@@ -4,6 +4,7 @@ import { SimulationInput, SimulationResult } from '@/lib/simulation';
 interface UseSimulationReturn {
   loading: boolean;
   error: string | null;
+  fieldErrors: Record<string, string>;
   result: SimulationResult | null;
   runSimulation: (input: SimulationInput) => Promise<void>;
 }
@@ -14,11 +15,13 @@ interface UseSimulationReturn {
 export function useSimulation(): UseSimulationReturn {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [result, setResult] = useState<SimulationResult | null>(null);
 
   const runSimulation = useCallback(async (input: SimulationInput) => {
     setLoading(true);
     setError(null);
+    setFieldErrors({});
 
     try {
       const response = await fetch('/api/simulations', {
@@ -29,12 +32,20 @@ export function useSimulation(): UseSimulationReturn {
         body: JSON.stringify(input),
       });
 
+      const data = await response.json();
+
       if (!response.ok) {
-        throw new Error(`Error: ${response.statusText}`);
+        // Si hay errores de validación
+        if (data.errors && typeof data.errors === 'object') {
+          setFieldErrors(data.errors);
+          setError(data.error || 'Validación fallida');
+        } else {
+          setError(data.error || `Error: ${response.statusText}`);
+        }
+        return;
       }
 
-      const { data } = await response.json();
-      setResult(data);
+      setResult(data.data);
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Error desconocido';
       setError(message);
@@ -44,7 +55,7 @@ export function useSimulation(): UseSimulationReturn {
     }
   }, []);
 
-  return { loading, error, result, runSimulation };
+  return { loading, error, fieldErrors, result, runSimulation };
 }
 
 interface UseKpiReturn {

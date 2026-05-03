@@ -1,5 +1,12 @@
 # API Documentation - DSS Pausa Cafe
 
+## Modo de Ejecucion (MVP)
+
+El proyecto funciona en modo demo sin base de datos.
+
+- Sin `DATABASE_URL`: la API responde con datos mock/fallback y `persisted: false`.
+- Con `DATABASE_URL`: intenta persistir en Prisma y responde `persisted: true` cuando aplica.
+
 ## Base URL
 ```
 http://localhost:3000/api
@@ -26,6 +33,8 @@ Ejecuta una simulación de inversión con parámetros dados.
 ```json
 {
   "success": true,
+  "persisted": false,
+  "simulationId": null,
   "data": {
     "favorable": {
       "van": 5234567,
@@ -64,7 +73,9 @@ Verifica el estado de la API.
 ```json
 {
   "status": "ok",
-  "message": "API de simulaciones operativa",
+  "message": "API de simulaciones operativa (modo demo sin persistencia)",
+  "persisted": false,
+  "data": [],
   "timestamp": "2026-05-03T10:30:00Z"
 }
 ```
@@ -78,6 +89,7 @@ Obtiene los KPIs actuales de la cafetería.
 ```json
 {
   "success": true,
+  "source": "fallback-mock",
   "data": {
     "date": "2026-05-03",
     "totalOrders": 50,
@@ -116,7 +128,8 @@ Guarda nuevos KPIs.
 ```json
 {
   "success": true,
-  "message": "KPIs guardados correctamente",
+  "persisted": false,
+  "message": "Sin DATABASE_URL: KPI aceptado en modo demo (no persistido)",
   "data": { ... },
   "timestamp": "2026-05-03T10:30:00Z"
 }

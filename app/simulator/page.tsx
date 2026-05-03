@@ -9,12 +9,15 @@ import { SimulatorResults } from '../components/simulator/SimulatorResults';
 
 export default function SimulatorPage() {
   const [result, setResult] = useState<SimulationResult | undefined>();
+  const [lastInput, setLastInput] = useState<SimulationInput | undefined>();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
 
   const handleSimulate = async (input: SimulationInput) => {
     setIsLoading(true);
     setError(null);
+    setFieldErrors({});
 
     try {
       const response = await fetch('/api/simulations', {
@@ -23,12 +26,21 @@ export default function SimulatorPage() {
         body: JSON.stringify(input),
       });
 
+      const data = await response.json();
+
       if (!response.ok) {
-        throw new Error('Error en la simulación');
+        // Si hay errores de validación
+        if (data.errors && typeof data.errors === 'object') {
+          setFieldErrors(data.errors);
+          setError(data.error || 'Validación fallida');
+        } else {
+          setError(data.error || 'Error en la simulación');
+        }
+        return;
       }
 
-      const { data } = await response.json();
-      setResult(data);
+      setResult(data.data);
+      setLastInput(input);
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Error desconocido';
       setError(message);
@@ -59,8 +71,8 @@ export default function SimulatorPage() {
         </header>
 
         <section className="simulator-layout">
-          <InvestmentControls onSimulate={handleSimulate} isLoading={isLoading} />
-          <SimulatorResults result={result} isLoading={isLoading} />
+          <InvestmentControls onSimulate={handleSimulate} isLoading={isLoading} fieldErrors={fieldErrors} />
+          <SimulatorResults result={result} isLoading={isLoading} input={lastInput} risks={result?.risks} />
           <RiskPanel risks={result?.risks} />
         </section>
       </section>

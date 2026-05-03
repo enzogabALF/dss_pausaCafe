@@ -19,6 +19,10 @@ Todas las 5 páginas implementadas con mock data:
 
 ## ✅ FASE 2: BACKEND API - COMPLETADO
 
+### Modo MVP sin Base de Datos
+- ✅ API operativa sin `DATABASE_URL` (fallback mock + `persisted: false`)
+- ✅ Persistencia Prisma opcional solo cuando exista base configurada
+
 ### 2.1 Schema Prisma (`prisma/schema.prisma`)
 - ✅ Modelo `KpiBase`: Almacena indicadores clave (orders, revenue, margin, occupancy, etc.)
 - ✅ Modelo `Simulation`: Resultados de 3 escenarios (favorable, normal, unfavorable)
@@ -39,8 +43,8 @@ Todas las 5 páginas implementadas con mock data:
 
 ### 2.3 API Routes
 - ✅ **POST /api/simulations**: Ejecuta simulación, retorna VAN/TIR/Payback para 3 escenarios
-- ✅ **GET /api/kpi**: Obtiene KPIs actuales (mock data)
-- ✅ **POST /api/kpi**: Guarda nuevos KPIs (preparado para Prisma)
+- ✅ **GET /api/kpi**: Obtiene KPIs actuales (mock/fallback si no hay DB)
+- ✅ **POST /api/kpi**: Modo demo sin persistencia o guardado real con Prisma
 
 ### 2.4 Hooks React (`lib/hooks.ts`)
 - ✅ `useSimulation()`: Ejecuta simulaciones desde frontend
@@ -105,6 +109,8 @@ Riesgos:
 ## 📋 PRÓXIMOS PASOS OPCIONALES
 
 ### Opción 1: Persistencia en Base de Datos
+Opcional. No requerida para presentación MVP.
+
 ```bash
 docker run --name postgres-dss -e POSTGRES_PASSWORD=postgres -p 5432:5432 postgres
 npx prisma migrate dev --name init
@@ -128,6 +134,7 @@ npx prisma generate
 
 ✅ Frontend completamente funcional con 5 módulos  
 ✅ Backend API con lógica de simulación matemática  
+✅ Ejecución estable en modo demo sin base de datos  
 ✅ 3 escenarios de negocio calculados en tiempo real  
 ✅ Análisis de riesgos integrado  
 ✅ TypeScript strict mode en todo el stack  

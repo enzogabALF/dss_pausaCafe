@@ -1,13 +1,55 @@
 'use client';
 
-import { SimulationResult } from '@/lib/simulation';
+import { SimulationResult, SimulationInput } from '@/lib/simulation';
+import { RiskAnalysis } from '@/lib/types';
+import { exportResultsAsPDF, exportResultsAsCSV } from '@/lib/export-utils';
+import { useState } from 'react';
 
 export interface SimulatorResultsProps {
   result?: SimulationResult;
   isLoading?: boolean;
+  input?: SimulationInput;
+  risks?: RiskAnalysis;
 }
 
-export function SimulatorResults({ result, isLoading }: SimulatorResultsProps) {
+export function SimulatorResults({ result, isLoading, input, risks }: SimulatorResultsProps) {
+  const [exportingPDF, setExportingPDF] = useState(false);
+  const [exportingCSV, setExportingCSV] = useState(false);
+
+  const handleExportPDF = async () => {
+    if (!result || !input || !risks) return;
+    setExportingPDF(true);
+    try {
+      await exportResultsAsPDF(result, risks, {
+        investment: input.initialInvestment,
+        costPercent: input.costPerOrder,
+        dailyOrders: input.dailyOrders,
+        averageTicket: input.averageTicket,
+      });
+    } catch (error) {
+      console.error('Error exporting PDF:', error);
+    } finally {
+      setExportingPDF(false);
+    }
+  };
+
+  const handleExportCSV = () => {
+    if (!result || !input || !risks) return;
+    setExportingCSV(true);
+    try {
+      exportResultsAsCSV(result, risks, {
+        investment: input.initialInvestment,
+        costPercent: input.costPerOrder,
+        dailyOrders: input.dailyOrders,
+        averageTicket: input.averageTicket,
+      });
+    } catch (error) {
+      console.error('Error exporting CSV:', error);
+    } finally {
+      setExportingCSV(false);
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="simulator-results-stack">
@@ -99,6 +141,55 @@ export function SimulatorResults({ result, isLoading }: SimulatorResultsProps) {
           </div>
         </div>
       </article>
+
+      {result && input && risks && (
+        <article className="panel simulator-panel">
+          <div className="panel-title-row">
+            <h2>Exportar Resultados</h2>
+            <span>Descarga tu análisis en PDF o CSV</span>
+          </div>
+          
+          <div style={{ display: 'flex', gap: '12px', marginTop: '16px' }}>
+            <button
+              onClick={handleExportPDF}
+              disabled={exportingPDF}
+              className="export-button export-button-pdf"
+              style={{
+                padding: '10px 16px',
+                backgroundColor: exportingPDF ? '#888' : 'hsl(var(--accent))',
+                color: '#fff',
+                border: 'none',
+                borderRadius: '6px',
+                cursor: exportingPDF ? 'not-allowed' : 'pointer',
+                fontWeight: '600',
+                fontSize: '0.9em',
+                transition: 'all 0.3s ease',
+              }}
+            >
+              {exportingPDF ? '⏳ Generando PDF...' : '📄 Descargar PDF'}
+            </button>
+            
+            <button
+              onClick={handleExportCSV}
+              disabled={exportingCSV}
+              className="export-button export-button-csv"
+              style={{
+                padding: '10px 16px',
+                backgroundColor: exportingCSV ? '#888' : '#22c55e',
+                color: '#fff',
+                border: 'none',
+                borderRadius: '6px',
+                cursor: exportingCSV ? 'not-allowed' : 'pointer',
+                fontWeight: '600',
+                fontSize: '0.9em',
+                transition: 'all 0.3s ease',
+              }}
+            >
+              {exportingCSV ? '⏳ Generando CSV...' : '📊 Descargar CSV'}
+            </button>
+          </div>
+        </article>
+      )}
     </div>
   );
 }

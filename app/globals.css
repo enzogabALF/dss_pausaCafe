@@ -2,6 +2,38 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Animaciones */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideInLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
 :root {
   color-scheme: dark;
   --background: 28 19% 6%;
@@ -107,11 +139,18 @@ a {
   color: hsl(var(--foreground));
   text-align: left;
   cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.sidebar-link:hover {
+  background: rgba(245, 162, 76, 0.08);
+  border-color: rgba(245, 162, 76, 0.15);
 }
 
 .sidebar-link.active {
   background: rgba(245, 162, 76, 0.12);
   border-color: rgba(245, 162, 76, 0.22);
+  font-weight: 600;
 }
 
 .sidebar-footer {
@@ -180,16 +219,27 @@ a {
   border-radius: 1.25rem;
   background: rgba(24, 18, 15, 0.96);
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  animation: fadeIn 0.5s ease-out;
 }
 
 .kpi-card {
   padding: 1rem;
+  cursor: pointer;
+}
+
+.kpi-card:hover {
+  transform: translateY(-4px);
+  border-color: hsl(var(--accent));
+  box-shadow: 0 20px 40px rgba(245, 162, 76, 0.15), 0 10px 30px rgba(0, 0, 0, 0.25);
+  background: rgba(245, 162, 76, 0.05);
 }
 
 .kpi-card strong {
   display: block;
   margin: 0.4rem 0;
   font-size: 1.3rem;
+  color: hsl(var(--accent));
 }
 
 .dashboard-grid {
@@ -204,6 +254,11 @@ a {
 
 .panel {
   padding: 1.25rem;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.panel:hover {
+  box-shadow: 0 20px 40px rgba(245, 162, 76, 0.1), 0 10px 30px rgba(0, 0, 0, 0.25);
 }
 
 .panel-title-row {
@@ -324,6 +379,13 @@ a {
   border-radius: 1rem;
   background: rgba(255, 255, 255, 0.02);
   border: 1px solid rgba(255, 255, 255, 0.05);
+  transition: all 0.2s ease;
+}
+
+.simulator-control:hover,
+.simulator-control:focus-within {
+  background: rgba(245, 162, 76, 0.06);
+  border-color: rgba(245, 162, 76, 0.2);
 }
 
 .simulator-control-header,
@@ -336,6 +398,13 @@ a {
 .simulator-control input[type='range'] {
   width: 100%;
   accent-color: #f5a24c;
+  cursor: pointer;
+  height: 6px;
+  transition: box-shadow 0.2s ease;
+}
+
+.simulator-control input[type='range']:hover {
+  box-shadow: 0 0 8px rgba(245, 162, 76, 0.3);
 }
 
 .simulator-note {
@@ -364,6 +433,14 @@ a {
   border-radius: 1rem;
   background: rgba(255, 255, 255, 0.02);
   border: 1px solid rgba(255, 255, 255, 0.06);
+  transition: all 0.3s ease;
+}
+
+.result-card:hover,
+.scenario-card:hover {
+  transform: translateY(-2px);
+  border-color: rgba(245, 162, 76, 0.2);
+  background: rgba(245, 162, 76, 0.04);
 }
 
 .result-card p,

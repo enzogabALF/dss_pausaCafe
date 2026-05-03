@@ -1,12 +1,19 @@
+'use client';
+
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
+
 const items = [
-  { label: 'Dashboard', active: true },
-  { label: 'Simulador', active: false },
-  { label: 'Productos', active: false },
-  { label: 'Analíticas', active: false },
-  { label: 'Alertas', active: false },
+  { label: 'Dashboard', href: '/' },
+  { label: 'Simulador', href: '/simulator' },
+  { label: 'Productos', href: '/products' },
+  { label: 'Analíticas', href: '/analytics' },
+  { label: 'Alertas', href: '/alerts' },
 ];
 
 export function Sidebar() {
+  const pathname = usePathname();
+
   return (
     <aside className="sidebar-shell">
       <div className="sidebar-brand">
@@ -18,15 +25,19 @@ export function Sidebar() {
       </div>
 
       <nav className="sidebar-nav" aria-label="Navegación principal">
-        {items.map((item) => (
-          <button
-            key={item.label}
-            className={item.active ? 'sidebar-link active' : 'sidebar-link'}
-            type="button"
-          >
-            {item.label}
-          </button>
-        ))}
+        {items.map((item) => {
+          const isActive = pathname === item.href;
+
+          return (
+            <Link
+              key={item.label}
+              className={isActive ? 'sidebar-link active' : 'sidebar-link'}
+              href={item.href}
+            >
+              {item.label}
+            </Link>
+          );
+        })}
       </nav>
 
       <footer className="sidebar-footer">Configuración</footer>

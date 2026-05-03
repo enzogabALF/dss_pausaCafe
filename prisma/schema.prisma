@@ -1,0 +1,93 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// KPI Base - Indicadores clave de la cafetería
+model KpiBase {
+  id        String   @id @default(cuid())
+  date      DateTime @default(now())
+  
+  // Datos de ventas
+  totalOrders       Int      @default(0)      // Total de pedidos
+  totalRevenue      Float    @default(0)      // Ingresos totales
+  averageTicket     Float    @default(0)      // Ticket promedio
+  digitalSales      Float    @default(0)      // Ventas digitales (%)
+  
+  // Datos de costos
+  totalCost         Float    @default(0)      // Costo total
+  operationalCost   Float    @default(0)      // Costo operacional
+  margin            Float    @default(0)      // Margen (%)
+  
+  // Datos de ocupación
+  occupancyRate     Float    @default(0)      // Tasa de ocupación (%)
+  peakHours         String   @default("")    // Horarios pico (JSON)
+  
+  // Datos de categorías
+  categories        String   @default("{}") // Categorías y ventas (JSON)
+  
+  // Metadata
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  // Relación con simulaciones
+  simulations       Simulation[]
+}
+
+// Simulation - Simulaciones de escenarios
+model Simulation {
+  id                String   @id @default(cuid())
+  
+  // Parámetros de entrada
+  initialInvestment Float
+  costPerOrder      Float    // Porcentaje
+  dailyOrders       Int
+  averageTicket     Float
+  
+  // Escenarios calculados
+  favorableVAN      Float
+  favorableTIR      Float
+  favorablePayback  Float
+  favorableIncome   Float
+  
+  normalVAN         Float
+  normalTIR         Float
+  normalPayback     Float
+  normalIncome      Float
+  
+  unfavorableVAN    Float
+  unfavorableTIR    Float
+  unfavorablePayback Float
+  unfavorableIncome Float
+  
+  // Análisis de riesgos
+  riskFactors       String   @default("{}") // Factores de riesgo (JSON)
+  totalRiskImpact   Float    @default(0)
+  
+  // KPI de referencia
+  kpiId             String
+  kpi               KpiBase  @relation(fields: [kpiId], references: [id], onDelete: Cascade)
+  
+  // Metadata
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+}
+
+// AuditLog - Registro de cambios
+model AuditLog {
+  id        String   @id @default(cuid())
+  action    String
+  model     String
+  recordId  String
+  changes   String   @default("{}")
+  userId    String   @default("system")
+  
+  createdAt DateTime @default(now())
+}

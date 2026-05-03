@@ -1,5 +1,5 @@
-import { Header } from '@/components/navigation/Header';
-import { Sidebar } from '@/components/navigation/Sidebar';
+import { Header } from './components/navigation/Header';
+import { Sidebar } from './components/navigation/Sidebar';
 
 const kpis = [
   { label: 'Margen Bruto', value: '68.5%', delta: '+2.3%' },

@@ -32,7 +32,7 @@ export function Sidebar() {
             <Link
               key={item.label}
               className={isActive ? 'sidebar-link active' : 'sidebar-link'}
-              href={item.href}
+              href={item.href as any}
             >
               {item.label}
             </Link>

@@ -4,6 +4,8 @@ import { useEffect } from 'react';
 import { useKpi } from '../lib/hooks';
 import { Header } from '../components/navigation/Header';
 import { Sidebar } from '../components/navigation/Sidebar';
+import { WeeklySalesChart } from './components/dashboard/WeeklySalesChart';
+import { HourlyOccupancyChart } from './components/dashboard/HourlyOccupancyChart';
 
 export default function HomePage() {
   const { loading, error, kpi, fetchKpi } = useKpi();
@@ -68,7 +70,9 @@ export default function HomePage() {
                   <h2>Ventas Semanales</h2>
                   <span>Ventas vs Ganancia</span>
                 </div>
-                <div className="chart-placeholder chart-large" />
+                <div style={{ height: '300px', width: '100%', marginTop: '16px' }}>
+                  <WeeklySalesChart />
+                </div>
               </article>
 
               <article className="panel panel-large">
@@ -76,7 +80,9 @@ export default function HomePage() {
                   <h2>Ocupación por Horario</h2>
                   <span>Alta, media y baja</span>
                 </div>
-                <div className="chart-placeholder chart-large bar-chart" />
+                <div style={{ height: '300px', width: '100%', marginTop: '16px' }}>
+                  <HourlyOccupancyChart />
+                </div>
               </article>
 
               <article className="panel panel-wide">

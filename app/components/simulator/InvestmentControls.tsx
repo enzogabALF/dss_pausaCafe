@@ -38,7 +38,7 @@ export function InvestmentControls({ onSimulate, isLoading = false, fieldErrors 
     
     if (!validation.success) {
       const errors: Record<string, string> = {};
-      validation.error.errors.forEach((err) => {
+      validation.error.issues.forEach((err: any) => {
         const field = String(err.path[0]);
         errors[field] = err.message;
       });

@@ -3,7 +3,7 @@
 ## Core Principles
 
 ### I. Escalabilidad por Diseño
-Cada módulo debe diseñarse considerando crecimiento futuro: múltiples sucursales, aumentos de volumen de datos, y nuevas funcionalidades. La arquitectura de microservicios permite que cada módulo escale independientemente. Las decisiones de diseño deben justificar su impacto en escalabilidad.
+Cada módulo debe diseñarse considerando crecimiento futuro: múltiples sucursales, aumentos de volumen de datos y nuevas funcionalidades. La arquitectura debe mantenerse modular y desacoplada para permitir escalar por partes sin romper el MVP. Las decisiones de diseño deben justificar su impacto en escalabilidad.
 
 ### II. Usabilidad Primero
 La interfaz debe ser intuitiva para staff sin experiencia técnica. Cada pantalla debe responder a una necesidad real de negocio. Las métricas de UX (tiempo de tarea, clics necesarios, tasa de error) son KPIs del producto, no afterthought.
@@ -15,26 +15,26 @@ Todo análisis debe responder una pregunta de negocio específica. Los dashboard
 Toda lógica de negocio (análisis, predicciones, cálculos financieros) se especifica con tests primero. Cobertura mínima 80%. Los tests de integración validan que los módulos DSS producen recomendaciones consistentes.
 
 ### V. Observabilidad Estructurada
-Logging JSON en producción. Cada cambio de inventario, cada recomendación, cada decisión se registra con trazabilidad. Los errores incluyen contexto suficiente para diagnóstico.
+Logging estructurado en producción. Cada cambio de inventario, cada recomendación, cada decisión y cada simulación relevante se registra con trazabilidad. Los errores incluyen contexto suficiente para diagnóstico.
 
 ## Arquitectura y Decisiones Técnicas
 
 ### Stack Backend/Full-Stack
 - **Framework**: Next.js 15+ con App Router
 - **Lenguaje**: TypeScript (strict mode)
-- **Base de Datos**: PostgreSQL (single source of truth)
-- **Caché**: Redis (si se requiere en fases posteriores)
+- **Base de Datos**: PostgreSQL opcional en MVP; Prisma como ORM
 - **Validación**: Zod (runtime type safety)
 - **ORM**: Prisma (type-safe queries)
-- **Autenticación**: JWT + bcrypt si el módulo de acceso se incorpora
+- **Autenticación**: Pendiente como fase siguiente; no bloquear el MVP demo
 
 ### Stack Frontend
 - **Framework**: Next.js 15+ (App Router)
 - **Lenguaje**: TypeScript (strict mode)
-- **Estado**: TanStack Query (server state) + Zustand (UI state)
-- **UI**: Shadcn/ui + Tailwind CSS (accesibilidad + consistencia)
-- **Gráficos**: Recharts (curva de aprendizaje baja)
-- **Formularios**: React Hook Form (performance)
+- **Estado**: Estado local de React y hooks propios
+- **UI**: Tailwind CSS
+- **Gráficos**: Recharts
+- **Formularios**: Validación con Zod y componentes React
+- **Exportación**: jsPDF + html2canvas
 
 ### Principios Arquitectónicos
 - **Separación de Responsabilidades**: Cada módulo tiene una única razón de cambio
@@ -85,6 +85,9 @@ Logging JSON en producción. Cada cambio de inventario, cada recomendación, cad
 - Route handlers para simulaciones
 - Componentes de dashboard reutilizables
 - Server Components donde simplifiquen la entrega
+- APIs en `app/api/` para simulaciones y KPIs
+- Lógica compartida en `lib/`
+- Persistencia opcional con Prisma
 
 ## Estándares de Desarrollo
 
@@ -97,8 +100,8 @@ Logging JSON en producción. Cada cambio de inventario, cada recomendación, cad
 
 ### Testing
 - **Unitarios**: Lógica de negocio aislada
-- **Integración**: API routes + base de datos
-- **E2E**: Flujos críticos (login, crear producto, registrar venta)
+- **Integración**: API routes + base de datos opcional
+- **E2E**: Flujos críticos del simulador y dashboard
 - **Cobertura**: 80% mínimo para lógica DSS
 
 ### Base de Datos

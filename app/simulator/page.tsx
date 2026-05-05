@@ -6,10 +6,12 @@ import { Sidebar } from '../components/navigation/Sidebar';
 import { InvestmentControls } from '../components/simulator/InvestmentControls';
 import { RiskPanel } from '../components/simulator/RiskPanel';
 import { SimulatorResults } from '../components/simulator/SimulatorResults';
+import type { SavedScenario } from '../components/simulator/SimulatorResults';
 
 export default function SimulatorPage() {
   const [result, setResult] = useState<SimulationResult | undefined>();
   const [lastInput, setLastInput] = useState<SimulationInput | undefined>();
+  const [presetInput, setPresetInput] = useState<SimulationInput | undefined>();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
@@ -41,6 +43,7 @@ export default function SimulatorPage() {
 
       setResult(data.data);
       setLastInput(input);
+      setPresetInput(input);
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Error desconocido';
       setError(message);
@@ -48,6 +51,14 @@ export default function SimulatorPage() {
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const handleLoadScenario = (scenario: SavedScenario) => {
+    setResult(scenario.result);
+    setLastInput(scenario.input);
+    setPresetInput(scenario.input);
+    setError(null);
+    setFieldErrors({});
   };
 
   return (
@@ -66,13 +77,24 @@ export default function SimulatorPage() {
 
           <div className="dashboard-header-actions">
             <span className="status-pill">Última actualización: Hoy, 14:30</span>
-            {error && <span style={{ color: 'red' }}>{error}</span>}
+            {error && <span className="simulator-error-pill">{error}</span>}
           </div>
         </header>
 
         <section className="simulator-layout">
-          <InvestmentControls onSimulate={handleSimulate} isLoading={isLoading} fieldErrors={fieldErrors} />
-          <SimulatorResults result={result} isLoading={isLoading} input={lastInput} risks={result?.risks} />
+          <InvestmentControls
+            onSimulate={handleSimulate}
+            isLoading={isLoading}
+            fieldErrors={fieldErrors}
+            initialValues={presetInput}
+          />
+          <SimulatorResults
+            result={result}
+            isLoading={isLoading}
+            input={lastInput}
+            risks={result?.risks}
+            onLoadScenario={handleLoadScenario}
+          />
           <RiskPanel risks={result?.risks} />
         </section>
       </section>

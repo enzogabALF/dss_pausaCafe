@@ -51,6 +51,8 @@ unzip dss_pausaCafe-main.zip
 cd dss_pausaCafe
 ```
 
+Si trabajas dentro de este workspace de VS Code, ya estás en la carpeta correcta del proyecto y puedes saltar este paso.
+
 ---
 
 ### 3️⃣ Instalar Dependencias
@@ -81,6 +83,13 @@ npm run build
 # ✓ Generated successfully
 ```
 
+Si prefieres validar antes de construir, también puedes ejecutar:
+
+```bash
+npm run test
+npm run lint
+```
+
 ---
 
 ### 5️⃣ Iniciar el Servidor
@@ -96,6 +105,15 @@ npm run dev
 # - Local:        http://localhost:3000
 # - Environments: .env.local
 ```
+
+### 6️⃣ Verificar el modo demo
+
+Si no tienes base de datos configurada, no necesitas hacer nada extra. La app sigue funcionando con datos mock en:
+
+- `GET /api/kpi`
+- `POST /api/simulations`
+
+Esto permite usar el dashboard, el simulador, analíticas y alertas sin PostgreSQL.
 
 ---
 
@@ -160,7 +178,7 @@ CREATE DATABASE dss_cafe;
 
 #### 3. Configurar Variable de Entorno
 
-Crea un archivo `.env.local` en la raíz del proyecto:
+Crea un archivo `.env.local` en la raíz del proyecto con esta variable:
 
 ```bash
 # .env.local
@@ -181,14 +199,17 @@ npx prisma migrate dev --name init
 # Esto creará las tablas automáticamente
 ```
 
-#### 5. Verificar Conexión
+#### 4.1. Abrir Prisma Studio
 
 ```bash
-# Abre la interfaz Prisma Studio
 npx prisma studio
-
-# Debería abrir http://localhost:5555 con la BD visual
 ```
+
+Esto abre una interfaz visual para revisar `KpiBase`, `Simulation` y `AuditLog`.
+
+#### 5. Verificar conexión
+
+Si `prisma studio` abre sin errores y ves las tablas del esquema, la persistencia quedó lista.
 
 ---
 
@@ -208,13 +229,20 @@ npm run lint
 # Tests
 npm run test
 npm run test:watch
-npm run test:coverage
 
 # Prisma (si usas DB)
 npx prisma generate
 npx prisma migrate dev
 npx prisma studio
 ```
+
+## ✅ Flujo recomendado para dejarlo funcionando
+
+1. Instala dependencias con `npm install`.
+2. Verifica con `npm run build`.
+3. Si quieres probar la UI, ejecuta `npm run dev`.
+4. Si quieres persistencia real, configura `DATABASE_URL` y aplica migraciones.
+5. Si solo necesitas la demo académica, usa el modo mock y no configures base de datos.
 
 ---
 
@@ -241,7 +269,13 @@ kill -9 <PID>
 ### Error: "Module not found"
 ```bash
 # Limpia e reinstala
-rm -rf node_modules package-lock.json
+npm install
+```
+
+En Windows, si quieres limpiar por completo antes de reinstalar, usa PowerShell:
+
+```powershell
+Remove-Item -Recurse -Force node_modules, package-lock.json
 npm install
 ```
 
@@ -258,6 +292,14 @@ npm run dev
 cd dss_pausaCafe
 # Luego ejecuta los comandos
 ```
+
+### Error: "DATABASE_URL is not defined"
+- Si vas a usar el modo demo, ignora este error y deja la base de datos sin configurar.
+- Si vas a usar persistencia real, crea `.env.local` y define `DATABASE_URL`.
+
+### Error: "npm run test:coverage" no existe
+- En este repositorio no hay script de cobertura definido en `package.json`.
+- Usa `npm run test` para Vitest y agrega cobertura solo si decides ampliar el setup.
 
 ---
 

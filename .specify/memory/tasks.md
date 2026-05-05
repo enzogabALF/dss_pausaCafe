@@ -1,8 +1,8 @@
 # Tasks: Pausa Cafe DSS Demo
 
 **Input**: Specification and implementation plan for a demo DSS for Pausa Cafe.
-**Scope**: Next.js + TypeScript + Tailwind front-end, PostgreSQL + Prisma data layer, no deployment in this phase.
-**Organization**: Tasks are grouped by user story so each story can be implemented and validated independently.
+**Scope**: Next.js 15 + TypeScript + Tailwind front-end, PostgreSQL + Prisma data layer as optional persistence, no deployment in this phase.
+**Organization**: Tasks are grouped by user story and by pending backlog so each block can be implemented and validated independently.
 
 ## Format: `[ID] [P?] [Story] Description`
 
@@ -225,3 +225,47 @@
 - [x] T059 (CA-2) Escribir Component Tests para las visualizaciones de KPIs y dashboard.
 - [x] T060 (CA-4) Escribir Unit Tests para el motor de recomendaciones en `lib/alerts/risk-engine.ts`.
 - [x] T061 (CA-5) Escribir Component Tests para `InvestmentControls.tsx` verificando que los inputs actualicen correctamente los cálculos.
+
+---
+
+## Phase 9: Backlog de Requerimientos Faltantes
+
+**Purpose**: Cerrar las brechas detectadas entre la especificación funcional actualizada y lo que el MVP ya implementa.
+
+### Objetivo
+- Completar los requerimientos de negocio que todavía no están cubiertos por el repositorio actual.
+- Mantener el orden de entrega: primero seguridad y persistencia, luego datos operativos y alertas reales.
+
+### Tests para el backlog
+
+- [x] T062 [P] [RB1] Add tests for authentication guard and role access in `tests/unit/auth/auth-guard.test.ts`
+- [x] T063 [P] [RB2] Add tests for saved scenario persistence and reuse in `tests/unit/lib/simulation/saved-scenarios.test.ts`
+- [x] T064 [P] [RB3] Add tests for inventory and staff operational data in `tests/unit/lib/operations/operations-data.test.ts`
+- [x] T065 [P] [RB4] Add tests for real alert generation from KPI and stock thresholds in `tests/unit/lib/alerts/real-alerts.test.ts`
+- [x] T066 [P] [RB5] Add tests for report metadata and history tracking in `tests/unit/lib/export/reports.test.ts`
+
+### Implementation for the backlog
+
+- [x] T067 [RB1] Implement authentication and role-based access in `app/api/auth/route.ts`, `lib/auth.ts`, and `components/navigation/Header.tsx`
+- [x] T068 [RB1] Protect sensitive pages and API routes with session checks in `app/**` and `app/api/**`
+- [x] T069 [RB2] Implement save, edit, and reuse flows for simulations in `app/api/simulations/route.ts`, `lib/simulation.ts`, and `app/simulator/page.tsx`
+- [x] T070 [RB2] Add a saved scenarios panel in `app/components/simulator/SavedScenariosPanel.tsx`
+- [x] T071 [RB3] Implement operational inventory and staff models in `prisma/schema.prisma`, `lib/types.ts`, and `app/api/operations/route.ts`
+- [x] T072 [RB3] Add an operational data dashboard panel for stock and capacity in `app/dashboard/page.tsx` and `app/components/dashboard/OperationalStatusPanel.tsx`
+- [x] T073 [RB4] Replace mock alerts with rule-based alert generation from live KPI and operational data in `lib/alerts/risk-engine.ts` and `app/api/alerts/route.ts`
+- [x] T074 [RB4] Wire alerts UI to generated alerts in `app/alerts/page.tsx` and `app/components/alerts/AlertsList.tsx`
+- [x] T075 [RB5] Persist export metadata and report history in `app/api/reports/route.ts`, `lib/export-utils.ts`, and `prisma/schema.prisma`
+- [x] T076 [RB5] Add report history and download reuse UI in `app/components/reports/ReportHistoryPanel.tsx`
+
+### Non-functional validation backlog
+
+- [ ] T077 [P] Measure response times for dashboard and simulator under load in `tests/performance/**`
+- [ ] T078 [P] Validate 5-user concurrent access scenario against local/demo limits in `tests/performance/concurrency.test.ts`
+- [ ] T079 [P] Add browser compatibility smoke checks for Chrome, Edge, and Firefox in `tests/e2e/browser-compatibility.spec.ts`
+- [x] T080 Document fiabilidad, disponibilidad, and recovery expectations in `IMPLEMENTATION_PLAN.md` and `README.md`
+
+### Checkpoint
+
+- The MVP is already usable for simulation, KPI visualization, analytics, alerts, export, and documentation.
+- The backlog above covers the missing business and non-functional requirements identified during validation.
+- After this phase, the next implementation pass should start with RB1 and RB2.

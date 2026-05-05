@@ -1,0 +1,3 @@
+- [x] Specification aligned
+- [x] Plan aligned
+- [x] Tasks aligned

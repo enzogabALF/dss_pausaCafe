@@ -56,6 +56,34 @@ Permitir variar manualmente:
 - Margen bruto
 - Mix digital/presencial
 
+### RF-6: Gestión de Inventario y Personal
+El sistema debe permitir registrar y consultar información operativa del negocio, incluyendo:
+- Inventario o stock disponible
+- Personal o capacidad operativa
+- Eventos de reposición o faltantes
+- Relación entre demanda y capacidad de atención
+
+### RF-7: Alertas Automáticas
+El sistema debe emitir alertas ante situaciones críticas como:
+- Faltantes de stock
+- Baja de ventas
+- Aumento de costos
+- Caída de margen
+- Riesgo operacional por falta de personal
+
+### RF-8: Reportes y Exportación
+El sistema debe permitir generar reportes de resultados para consulta posterior, incluyendo:
+- PDF con resultados de simulación
+- CSV o tabla descargable
+- Resumen ejecutivo por escenario
+- Historial de consultas o ejecuciones
+
+### RF-9: Seguridad y Acceso
+El sistema debe requerir autenticación mediante usuario y contraseña para acceder a la información, y debe controlar el acceso por rol.
+
+### RF-10: Gestión de Escenarios Guardados
+El sistema debe permitir guardar, editar y reutilizar escenarios de simulación previamente creados, conservando sus parámetros y resultados.
+
 ---
 
 ## 👤 Historias de Usuario
@@ -74,6 +102,21 @@ Como gerente, quiero comparar los tres escenarios en una misma pantalla para ide
 
 ### HU-5: Obtener recomendaciones accionables
 Como dueño de la cafetería, quiero que el sistema me sugiera acciones concretas para cada escenario, de modo que pueda responder con rapidez ante cambios en el negocio.
+
+### HU-6: Gestionar inventario y capacidad operativa
+Como administrador, quiero registrar stock, capacidad y personal disponible para entender cómo afectan al negocio las variaciones operativas.
+
+### HU-7: Recibir alertas críticas
+Como gerente, quiero recibir alertas cuando exista faltante de stock, baja de ventas o aumento de costos, para actuar a tiempo.
+
+### HU-8: Generar reportes
+Como analista, quiero exportar reportes de resultados para analizarlos o compartirlos luego.
+
+### HU-9: Iniciar sesión en el sistema
+Como usuario autorizado, quiero autenticación por usuario y contraseña para acceder solo a la información que me corresponde.
+
+### HU-10: Guardar y reutilizar escenarios
+Como analista, quiero guardar simulaciones previas para compararlas, editarlas y reutilizarlas sin volver a capturar todo desde cero.
 
 ---
 
@@ -117,6 +160,32 @@ Como dueño de la cafetería, quiero que el sistema me sugiera acciones concreta
 
 **Postcondición:** El usuario conoce las acciones recomendadas para ese escenario.
 
+### CU-4: Gestionar inventario operativo
+**Actor principal:** Administrador
+
+**Precondiciones:** El usuario ha iniciado sesión.
+
+**Flujo principal:**
+1. El usuario accede al módulo operativo.
+2. El sistema muestra stock, capacidad y personal.
+3. El usuario actualiza datos operativos.
+4. El sistema guarda los cambios y recalcula alertas si aplica.
+
+**Postcondición:** La información operativa queda registrada para análisis.
+
+### CU-5: Guardar y reutilizar escenario
+**Actor principal:** Analista
+
+**Precondiciones:** Existe una simulación calculada.
+
+**Flujo principal:**
+1. El usuario selecciona guardar escenario.
+2. El sistema almacena los parámetros y resultados.
+3. El usuario abre el escenario guardado en otra sesión.
+4. El sistema recarga los datos para editar o comparar.
+
+**Postcondición:** El escenario queda disponible para reutilización.
+
 ---
 
 ## ✅ Criterios de Aceptación
@@ -145,6 +214,59 @@ Como dueño de la cafetería, quiero que el sistema me sugiera acciones concreta
 - El usuario debe poder modificar pedidos diarios, ticket promedio, margen bruto y ventas digitales.
 - Al cambiar un parámetro, la simulación debe recalcularse automáticamente o con una acción explícita de confirmar.
 - Los resultados deben reflejar los nuevos valores de entrada sin inconsistencias.
+
+### CA-6: Gestión de inventario y personal
+- El sistema debe mostrar stock, capacidad y personal disponible de forma consistente.
+- Los cambios operativos deben reflejarse en el dashboard o en el módulo operativo.
+- La información debe quedar lista para alimentar alertas y recomendaciones.
+
+### CA-7: Alertas automáticas
+- El sistema debe emitir alertas cuando se detecten condiciones críticas.
+- Las alertas deben ser visibles y clasificarse por prioridad.
+- Cada alerta debe indicar el motivo y la acción sugerida.
+
+### CA-8: Reportes y exportación
+- El sistema debe generar reportes descargables sin pérdida de formato relevante.
+- El reporte debe incluir parámetros de entrada, escenarios y riesgos.
+- El archivo exportado debe poder consultarse posteriormente.
+
+### CA-9: Seguridad y acceso
+- El sistema debe pedir credenciales para entrar a áreas protegidas.
+- Los usuarios deben ver solo las funciones permitidas por su rol.
+- Las acciones sensibles deben quedar asociadas a un usuario autenticado.
+
+### CA-10: Escenarios guardados
+- El usuario debe poder guardar un escenario calculado.
+- El usuario debe poder abrir y editar un escenario previamente guardado.
+- El sistema debe conservar los parámetros originales y los resultados asociados.
+
+---
+
+## 🔐 Requerimientos No Funcionales
+
+### RNF-1: Rendimiento de respuesta
+El sistema debe responder a las solicitudes del usuario en un tiempo máximo de 3 segundos en el 95% de las operaciones.
+
+### RNF-2: Concurrencia
+El sistema debe soportar al menos 5 usuarios concurrentes sin degradación significativa del rendimiento.
+
+### RNF-3: Cálculo financiero
+El sistema debe procesar cálculos de simulación (VAN, TIR, Payback) en menos de 2 segundos.
+
+### RNF-4: Seguridad
+El sistema debe requerir autenticación por usuario y contraseña, registrar logs de actividad y preservar la integridad de los datos.
+
+### RNF-5: Fiabilidad
+El sistema debe mantener una tasa de error menor al 5% y recuperarse automáticamente ante fallos menores sin pérdida de datos.
+
+### RNF-6: Disponibilidad
+El sistema debe estar disponible al menos el 95% del tiempo y accesible por internet cuando esté desplegado.
+
+### RNF-7: Mantenibilidad
+El sistema debe permitir mantenimiento y actualización por parte del equipo de desarrollo sin afectar significativamente su funcionamiento, y debe contar con documentación básica suficiente.
+
+### RNF-8: Portabilidad
+El sistema debe ser accesible desde diferentes navegadores web (Chrome, Edge y Firefox).
 
 ---
 

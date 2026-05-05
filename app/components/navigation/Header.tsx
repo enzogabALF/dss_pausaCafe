@@ -1,9 +1,10 @@
 interface HeaderProps {
   title: string;
   subtitle?: string;
+  role?: string;
 }
 
-export function Header({ title, subtitle }: HeaderProps) {
+export function Header({ title, subtitle, role = 'manager' }: HeaderProps) {
   return (
     <header className="dashboard-header">
       <div>
@@ -13,6 +14,7 @@ export function Header({ title, subtitle }: HeaderProps) {
       </div>
 
       <div className="dashboard-header-actions">
+        <span className="status-pill">Rol: {role}</span>
         <span className="status-pill">Última actualización: Hoy, 14:30</span>
         <button className="accent-button" type="button">
           Actualizar

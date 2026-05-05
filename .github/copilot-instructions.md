@@ -1,6 +1,6 @@
 ---
 name: "DSS Pausa Cafe"
-description: "Sistema de Soporte a la Toma de Decisiones para cafetería Pausa Cafe. TypeScript full-stack con React + Express, priorizando escalabilidad y usabilidad."
+description: "Sistema de Soporte a la Toma de Decisiones para cafetería Pausa Cafe. TypeScript full-stack con Next.js + React, priorizando escalabilidad y usabilidad."
 ---
 
 # Instrucciones Copilot - DSS Pausa Cafe
@@ -16,19 +16,19 @@ Estamos construyendo un **Sistema de Soporte a la Toma de Decisiones (DSS)** par
 
 ## Stack Tecnológico
 
-### Backend
-- **Node.js 18+** + **TypeScript** (strict mode)
-- **Express.js** para API REST
-- **PostgreSQL** + **Prisma ORM**
-- **Redis** para caché
+### Backend / Full-Stack
+- **Next.js 15+** con App Router
+- **TypeScript** (strict mode)
+- **Route Handlers** en `app/api/`
+- **PostgreSQL** + **Prisma ORM** (opcional en MVP demo)
 - **Zod** para validación
 
 ### Frontend
-- **React 18+** + **TypeScript**
-- **TanStack Query** para estado del servidor
-- **Zustand** para estado UI
-- **Shadcn/ui** + **Tailwind CSS**
+- **React 19** + **TypeScript**
+- **Estado local** y hooks propios
+- **Tailwind CSS**
 - **Recharts** para gráficos
+- **jsPDF + html2canvas** para exportación
 
 ## Principios de Desarrollo (OBLIGATORIOS)
 
@@ -66,123 +66,51 @@ describe('calculateMargin', () => {
 ## Estructura de Módulos
 
 ```
-backend/src/
-├── modules/
-│   ├── auth/          # Autenticación y autorización
-│   ├── products/      # Catálogo de productos
-│   ├── inventory/     # Gestión de inventario
-│   ├── sales/         # Registro de ventas
-│   ├── analytics/     # ⭐ CORE DSS: Análisis y predicciones
-│   └── dashboard/     # KPIs y visualizaciones
-├── services/          # Lógica transversal
-├── middleware/        # Auth, validación, error handling
-└── utils/             # Helpers y utilities
+dss_pausaCafe/
+├── app/
+│   ├── api/           # Route handlers (simulations, kpi)
+│   ├── analytics/     # Analíticas y pronósticos
+│   ├── alerts/        # Alertas y recomendaciones
+│   ├── products/      # Productos y rentabilidad
+│   ├── simulator/     # Simulador financiero
+│   └── components/    # UI reutilizable
+├── lib/               # Simulación, validaciones, exports, tipos
+├── prisma/            # Esquema y persistencia opcional
+└── __tests__/         # Tests Vitest
 ```
 
-El módulo **analytics** es el corazón del DSS y debe cuidarse especialmente.
+El módulo **simulator** es el corazón del DSS y el módulo **analytics** complementa el análisis de negocio.
 
 ## Patrones de Codificación
 
 ### Servicios (Lógica de Negocio)
 
 ```typescript
-// src/services/analytics.service.ts
-import { z } from 'zod';
-
+// lib/simulation.ts
 export class AnalyticsService {
   /** 
    * Calcula margen de ganancia por producto en un período.
    * Fórmula: (precio - costo_variable) / precio * 100
    * @returns Margen en porcentaje (0-100)
    */
-  async calculateMarginByProduct(productId: string, period: DateRange) {
-    const sales = await this.getSalesData(productId, period);
-    const costs = await this.getCostData(productId);
-    
-    if (sales.length === 0) {
-      return []; // Fallback: sin datos, sin recomendación
-    }
-    
-    return sales.map(sale => ({
-      date: sale.date,
-      revenue: sale.quantity * sale.price,
-      variableCost: sale.quantity * costs.variableCost,
-      margin: ((sale.price - costs.variableCost) / sale.price) * 100,
-    }));
-  }
+  // La lógica real vive en helpers puros del proyecto actual.
 }
 ```
 
 ### Endpoints (API Routes)
 
 ```typescript
-// src/routes/analytics.ts
-import { Router } from 'express';
-import { authenticate, authorize } from '../middleware/auth';
-
-const router = Router();
-
-router.get(
-  '/api/v1/analytics/margin/:productId',
-  authenticate,
-  authorize(['manager', 'analyst']),
-  async (req, res) => {
-    try {
-      const { productId } = req.params;
-      const { startDate, endDate } = req.query;
-      
-      const result = await analyticsService.calculateMarginByProduct(
-        productId,
-        { start: new Date(startDate), end: new Date(endDate) }
-      );
-      
-      res.json({
-        data: result,
-        error: null,
-        meta: { count: result.length, timestamp: new Date() }
-      });
-    } catch (error) {
-      res.status(400).json({
-        data: null,
-        error: error.message,
-        meta: { timestamp: new Date() }
-      });
-    }
-  }
-);
-
-export default router;
+// app/api/simulations/route.ts
+export async function POST(req: NextRequest) {
+  // Validar con Zod, ejecutar runSimulation y devolver resultados.
+}
 ```
 
 ### Componentes React
 
 ```typescript
-// frontend/src/components/dashboard/SalesChart.tsx
-import { useQuery } from '@tanstack/react-query';
-import { BarChart, Bar, XAxis, YAxis, Tooltip } from 'recharts';
-import { Skeleton } from '@/components/ui/skeleton';
-
-export function SalesChart() {
-  const { data, isLoading, error } = useQuery({
-    queryKey: ['sales', 'daily'],
-    queryFn: () => fetch('/api/v1/analytics/sales/daily')
-      .then(r => r.json())
-      .then(r => r.data),
-  });
-  
-  if (isLoading) return <Skeleton className="w-full h-80" />;
-  if (error) return <div>Error cargando datos</div>;
-  if (!data?.length) return <div>Sin datos disponibles</div>;
-  
-  return (
-    <BarChart data={data} width={600} height={300}>
-      <XAxis dataKey="date" />
-      <YAxis />
-      <Tooltip />
-      <Bar dataKey="revenue" fill="#8884d8" />
-    </BarChart>
-  );
-}
+// app/page.tsx o app/simulator/page.tsx
+// Componentes de dashboard y simulador con hooks propios, Tailwind y Recharts.
 ```
 
 ## Flujo de Trabajo

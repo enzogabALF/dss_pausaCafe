@@ -1,7 +1,82 @@
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 import { SimulationResult, SimulationInput } from './simulation';
-import { RiskAnalysis } from './types';
+import { RiskAnalysis, ReportMetadata } from './types';
+
+const REPORT_HISTORY_KEY = 'dss-pausa-cafe.report-history';
+
+export function buildReportMetadata(
+  format: 'pdf' | 'csv',
+  params: {
+    input: SimulationInput;
+    title?: string;
+    persisted?: boolean;
+    source?: 'demo' | 'database';
+  }
+): ReportMetadata {
+  return {
+    id: `${format}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+    title: params.title ?? `Reporte ${format.toUpperCase()} de simulación`,
+    format,
+    scenarioName: `Escenario $${params.input.initialInvestment.toLocaleString('es-CO')}`,
+    investment: params.input.initialInvestment,
+    costPercent: params.input.costPerOrder,
+    dailyOrders: params.input.dailyOrders,
+    averageTicket: params.input.averageTicket,
+    persisted: params.persisted ?? false,
+    source: params.source ?? 'demo',
+    createdAt: new Date().toISOString(),
+  };
+}
+
+export function readReportHistory(): ReportMetadata[] {
+  if (typeof window === 'undefined') {
+    return [];
+  }
+
+  try {
+    const raw = window.localStorage.getItem(REPORT_HISTORY_KEY);
+    if (!raw) {
+      return [];
+    }
+
+    const parsed = JSON.parse(raw) as ReportMetadata[];
+    return Array.isArray(parsed) ? parsed : [];
+  } catch (error) {
+    console.error('No se pudo leer el historial de reportes:', error);
+    return [];
+  }
+}
+
+export function saveReportHistory(entry: ReportMetadata): void {
+  if (typeof window === 'undefined') {
+    return;
+  }
+
+  try {
+    const current = readReportHistory();
+    const withoutDuplicate = current.filter((item) => item.id !== entry.id);
+    window.localStorage.setItem(REPORT_HISTORY_KEY, JSON.stringify([entry, ...withoutDuplicate].slice(0, 10)));
+  } catch (error) {
+    console.error('No se pudo guardar el historial de reportes:', error);
+  }
+}
+
+export async function recordReportHistory(entry: ReportMetadata): Promise<void> {
+  saveReportHistory(entry);
+
+  try {
+    await fetch('/api/reports', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(entry),
+    });
+  } catch (error) {
+    console.error('No se pudo sincronizar el historial de reportes:', error);
+  }
+}
 
 export async function exportResultsAsPDF(
   result: SimulationResult,

@@ -91,3 +91,56 @@ model AuditLog {
   
   createdAt DateTime @default(now())
 }
+
+// OperationalInventory - Insumos, stock y capacidad de operación
+model OperationalInventory {
+  id        String   @id @default(cuid())
+  name      String
+  category  String
+  stock     Int      @default(0)
+  minimum   Int      @default(0)
+  target    Int      @default(0)
+  unit      String   @default("unid")
+  critical  Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// StaffMember - Información operativa del personal
+model StaffMember {
+  id        String   @id @default(cuid())
+  name      String
+  role      String
+  shift     String
+  active    Boolean  @default(true)
+  workload   Float    @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// ReportHistory - Historial de exportaciones/reporte
+model ReportHistory {
+  id            String   @id @default(cuid())
+  title         String
+  format        String
+  scenarioName  String
+  investment    Float
+  costPercent   Float
+  dailyOrders   Int
+  averageTicket Float
+  persisted     Boolean  @default(false)
+  source        String   @default("demo")
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+// AuthSession - Sesiones demo/temporal
+model AuthSession {
+  id          String   @id @default(cuid())
+  userId      String
+  name        String
+  role        String
+  expiresAt   DateTime?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}

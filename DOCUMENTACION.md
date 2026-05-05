@@ -28,6 +28,8 @@ Bienvenido al centro de documentación del proyecto. Aquí encontrarás guías, 
 |---------|------------|-----------|
 | [README.md](./README.md) | Descripción general + Quick Start | Todos |
 | [GUIA_USO_SIMULADOR.md](./GUIA_USO_SIMULADOR.md) | Cómo usar cada módulo | Usuarios finales |
+| [ESPECIFICACION_TECNICA.md](./ESPECIFICACION_TECNICA.md) | Requerimientos, variables, QA | Arquitectos/Devs |
+| [MODELO_DATOS.md](./MODELO_DATOS.md) | Modelo ER, diccionario de datos | DBAs/Devs |
 | [app/components/](./app/components/) | Código de componentes React | Desarrolladores |
 | [app/components/simulator/](./app/components/simulator/) | Componentes del simulador | Desarrolladores |
 

@@ -91,3 +91,56 @@ export interface Alert {
   timestamp: string;
   actionable: boolean;
 }
+
+export type UserRole = 'viewer' | 'analyst' | 'manager' | 'admin';
+
+export interface SessionInfo {
+  userId: string;
+  name: string;
+  role: UserRole;
+  authenticated: boolean;
+}
+
+export interface InventoryItem {
+  id: string;
+  name: string;
+  category: string;
+  stock: number;
+  minimum: number;
+  target: number;
+  unit: string;
+  critical: boolean;
+}
+
+export interface StaffMember {
+  id: string;
+  name: string;
+  role: string;
+  shift: string;
+  active: boolean;
+  workload: number;
+}
+
+export interface OperationsSnapshot {
+  inventory: InventoryItem[];
+  staff: StaffMember[];
+  stockCoverage: number;
+  capacityUtilization: number;
+  activeStaff: number;
+  criticalItems: number;
+  updatedAt: string;
+}
+
+export interface ReportMetadata {
+  id: string;
+  title: string;
+  format: 'pdf' | 'csv';
+  scenarioName: string;
+  investment: number;
+  costPercent: number;
+  dailyOrders: number;
+  averageTicket: number;
+  persisted: boolean;
+  source: 'demo' | 'database';
+  createdAt: string;
+}

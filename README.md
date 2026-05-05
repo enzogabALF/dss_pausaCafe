@@ -1,175 +1,89 @@
-# DSS Pausa Cafe - Sistema de Soporte de Decisiones
+# DSS Pausa Cafe
 
 ![Versión](https://img.shields.io/badge/version-0.1.0-blue)
 ![Estado](https://img.shields.io/badge/estado-MVP%20Demo-brightgreen)
-![License](https://img.shields.io/badge/license-MIT-green)
+![Stack](https://img.shields.io/badge/stack-Next.js%2015%20%7C%20React%2019%20%7C%20TypeScript-111827)
 
-## 📋 Descripción General
+## Descripción
 
-**DSS Pausa Cafe** es un **Sistema de Soporte de Decisiones (Decision Support System)** diseñado para **Pausa Cafe** que permite proyectar escenarios de negocio y evaluar la viabilidad de inversiones mediante análisis financiero automático.
+DSS Pausa Cafe es un sistema de soporte de decisiones para la cafetería Pausa Cafe. El proyecto está orientado a un MVP académico/demo y permite analizar indicadores del negocio, simular escenarios de inversión y revisar alertas, analíticas y métricas operativas en una interfaz oscura y responsive.
 
-El sistema simula **3 escenarios económicos** (Favorable, Normal, Desfavorable) y calcula indicadores clave como **VAN (Valor Actual Neto)**, **TIR (Tasa Interna de Retorno)** y **Payback Period** para ayudar en la toma de decisiones estratégicas.
+La aplicación funciona en modo demo incluso sin base de datos. Cuando `DATABASE_URL` no está configurado, el sistema usa respuestas mock y mantiene operativo el flujo principal.
 
-### ✨ Características Principales
+## Funcionalidades principales
 
-- 🎯 **Simulador de Inversión**: Proyecta 3 escenarios automáticos con variaciones personalizadas
-- 📊 **Análisis Financiero**: Calcula VAN, TIR, Payback y flujos mensuales
-- ⚠️ **Análisis de Riesgos**: Evalúa 4 factores clave (dólar, demanda, competencia, energía)
-- 📈 **Dashboard Ejecutivo**: KPIs en tiempo real con visualizaciones interactivas
-- 📱 **Interfaz Responsive**: Diseño oscuro moderno y fácil de usar
-- 📊 **Múltiples Módulos**: Dashboard, Simulador, Productos, Analíticas, Alertas
-- 💾 **Modo Demo**: Funciona sin base de datos (perfecto para MVP)
+### Core MVP
+- Dashboard ejecutivo con KPIs, ventas y ocupación.
+- Simulador de inversión con VAN, TIR, payback y tres escenarios.
+- Vista de productos con análisis de rentabilidad.
+- Vista de analíticas con tendencias y proyecciones.
+- Vista de alertas con recomendaciones por escenario.
+- API REST para simulaciones y KPIs.
 
----
+### Nuevas Funcionalidades (RB1-RB5)
+- **Autenticación**: Sistema de roles (viewer, analyst, manager, admin) con middleware de protección
+- **Simulador Persistente**: Guardar, editar, renombrar y reutilizar escenarios desde la UI
+- **Dashboard Operativo**: Panel de estado operativo con inventario (Café, Leche, Pastelería, Vasos) y utilización de personal
+- **Alertas Reales**: Generación dinámica de alertas desde motor de reglas (márgenes críticos, ocupación alta, stock bajo, capacidad saturada)
+- **Reportes Persistentes**: Historial de exportaciones con metadatos (escenario, parámetros, timestamp), descargable en PDF/CSV
+- **Exportación**: Resultados a PDF y CSV con metadatos de simulación
+- **Persistencia**: Opcional con Prisma y PostgreSQL; localStorage para fallback
 
-## 🚀 Quick Start
+## Rutas de la aplicación
 
-### Requisitos
-- Node.js 18+ 
-- npm o yarn
-- Windows/Mac/Linux
+- `/` Dashboard principal.
+- `/simulator` Simulador de inversión.
+- `/products` Análisis de productos.
+- `/analytics` Analíticas y tendencias.
+- `/alerts` Alertas y recomendaciones.
 
-### Instalación
+## Requisitos
 
-```bash
-# Clonar repositorio
-git clone https://github.com/enzogabALF/dss_pausaCafe.git
-cd dss_pausaCafe
+- Node.js 18 o superior.
+- npm 9 o superior.
+- Windows, macOS o Linux.
 
-# Instalar dependencias
-npm install
+## Instalación
 
-# Iniciar servidor de desarrollo
-npm run dev
-```
+1. Clona el repositorio.
+2. Instala dependencias con `npm install`.
+3. Inicia el proyecto con `npm run dev`.
+4. Abre `http://localhost:3000`.
 
-La aplicación estará disponible en **http://localhost:3000**
+Si quieres usar persistencia real:
 
-### Uso Básico
+1. Configura `DATABASE_URL` en un archivo `.env.local`.
+2. Crea la base de datos PostgreSQL.
+3. Ejecuta `npx prisma generate`.
+4. Ejecuta las migraciones de Prisma.
 
-1. **Acceder al Simulador**: http://localhost:3000/simulator
-2. **Ingresar parámetros**:
-   - Inversión Inicial: $800,000
-   - Costo por Orden: $20
-   - Pedidos Diarios: 50
-   - Ticket Promedio: $10,000
-3. **Hacer clic en "Ejecutar Simulación"**
-4. **Ver resultados** de 3 escenarios con VAN, TIR y Payback
+## Uso rápido del simulador
 
----
+1. Abre `/simulator`.
+2. Ajusta los parámetros:
+   - Inversión inicial.
+   - Costo por pedido.
+   - Pedidos diarios.
+   - Ticket promedio.
+3. Haz clic en `Ejecutar Simulación`.
+4. Revisa VAN, TIR, payback y viabilidad.
+5. Usa `Guardar escenario actual` para recuperar ese caso después.
+6. Usa `Reutilizar` para volver a cargar un escenario guardado.
 
-## 📁 Estructura del Proyecto
+## Modo demo
 
-```
-dss_pausaCafe/
-├── app/
-│   ├── api/
-│   │   ├── kpi/route.ts              # API de KPIs
-│   │   └── simulations/route.ts      # API de simulaciones
-│   ├── components/
-│   │   ├── alerts/                   # Componentes de alertas
-│   │   ├── analytics/                # Componentes de análisis
-│   │   ├── dashboard/                # Componentes de dashboard
-│   │   ├── navigation/               # Header y Sidebar
-│   │   ├── products/                 # Componentes de productos
-│   │   └── simulator/                # Componentes del simulador
-│   ├── alerts/page.tsx               # Página de alertas
-│   ├── analytics/page.tsx            # Página de analíticas
-│   ├── dashboard/page.tsx            # Página de dashboard
-│   ├── page.tsx                      # Página de inicio
-│   ├── products/page.tsx             # Página de productos
-│   ├── simulator/page.tsx            # Página del simulador
-│   ├── layout.tsx                    # Layout general
-│   └── globals.css                   # Estilos globales
-├── lib/
-│   ├── api-utils.ts                  # Utilidades de API
-│   ├── export-utils.ts               # Exportación PDF/CSV
-│   ├── hooks.ts                      # Hooks React personalizados
-│   ├── prisma.ts                     # Cliente Prisma (opcional)
-│   ├── simulation.ts                 # Lógica de simulación
-│   ├── types.ts                      # Tipos TypeScript
-│   └── validations.ts                # Esquemas de validación Zod
-├── prisma/
-│   └── schema.prisma                 # Schema de base de datos
-├── public/                           # Archivos estáticos
-├── __tests__/                        # Tests (Vitest)
-├── package.json                      # Dependencias y scripts
-├── tsconfig.json                     # Config TypeScript
-├── next.config.mjs                   # Config Next.js
-├── tailwind.config.ts                # Config Tailwind CSS
-├── vitest.config.ts                  # Config Vitest
-├── API.md                            # Documentación API
-└── IMPLEMENTATION_PLAN.md            # Plan técnico
-```
+Cuando la base de datos no está disponible, la app sigue funcionando con datos de fallback.
 
----
+- `GET /api/kpi` retorna KPIs mock.
+- `POST /api/simulations` calcula la simulación en memoria.
+- El simulador puede mostrar resultados, exportarlos y guardar escenarios localmente.
 
-## 🎮 Módulos de la Aplicación
+## API principal
 
-### 1. **Dashboard** (`/dashboard`)
-- KPIs en tiempo real (Órdenes, Ingresos, Margen, Ocupación)
-- Gráficos de ventas por hora y semana
-- Estado de ocupación en vivo
+### `POST /api/simulations`
+Ejecuta una simulación financiera.
 
-### 2. **Simulador** (`/simulator`)
-- Controles interactivos para parámetros de inversión
-- Simulación de 3 escenarios automáticos
-- Resultados detallados (VAN, TIR, Payback)
-- Panel de análisis de riesgos
-- Exportar resultados a PDF/CSV
-
-### 3. **Productos** (`/products`)
-- Tabla de productos con ventas
-- Gráfico de rentabilidad por categoría
-- Análisis de ocupación por horario
-
-### 4. **Analíticas** (`/analytics`)
-- Proyecciones de demanda
-- Análisis de tendencias
-- Métricas de desempeño
-
-### 5. **Alertas** (`/alerts`)
-- Sistema de alertas en tiempo real
-- Recomendaciones por escenario
-- Filtros y busca
-
----
-
-## 📊 Lógica de Simulación
-
-### Escenarios
-
-El sistema calcula automáticamente **3 escenarios** basados en variaciones predefinidas:
-
-| Escenario | Variación | Pedidos | Ticket | Margen | Desc Digitales |
-|-----------|-----------|---------|--------|--------|-----------------|
-| 🟢 Favorable | +38% | +20% | +15% | +10% | +100% |
-| 🟡 Normal | +13.5% | +5% | +8% | +2% | +50% |
-| 🔴 Desfavorable | -28% | -20% | -10% | -15% | -50% |
-
-### Indicadores Financieros
-
-- **VAN (Valor Actual Neto)**: Valor presente de flujos futuros con tasa de descuento 1%
-- **TIR (Tasa Interna de Retorno)**: Tasa de rentabilidad anualizada
-- **Payback**: Meses para recuperar la inversión inicial
-- **Ingreso Neto**: Ganancia total proyectada
-
-### Análisis de Riesgos
-
-Se evalúan 4 factores clave:
-1. **Variación del Dólar**: Impacto en costos importados
-2. **Variación de Demanda**: Incertidumbre en volumen de clientes
-3. **Variación de Competencia**: Presión de competidores
-4. **Variación de Costo de Energía**: Fluctuación en servicios
-
----
-
-## 🔌 API REST
-
-La aplicación expone dos endpoints principales para simulaciones y KPIs:
-
-### POST /api/simulations
-Ejecuta una simulación de inversión
+Ejemplo:
 
 ```bash
 curl -X POST http://localhost:3000/api/simulations \
@@ -182,296 +96,95 @@ curl -X POST http://localhost:3000/api/simulations \
   }'
 ```
 
-**Respuesta:**
-```json
-{
-  "success": true,
-  "persisted": false,
-  "data": {
-    "favorable": {
-      "van": 350990493,
-      "tir": 1000,
-      "payback": 0,
-      "income": 15234000
-    },
-    "normal": {
-      "van": 288534934,
-      "tir": 1000,
-      "payback": 0.1,
-      "income": 5234000
-    },
-    "unfavorable": {
-      "van": 182742866,
-      "tir": 1000,
-      "payback": 0.1,
-      "income": -234000
-    },
-    "risks": {
-      "dolarVariation": 2,
-      "demandVariation": 4.5,
-      "competitionVariation": 2.5,
-      "energyCostVariation": 3.5,
-      "totalImpact": 1.3
-    }
-  },
-  "timestamp": "2026-05-03T23:08:28Z"
-}
+### `GET /api/kpi`
+Obtiene los indicadores actuales del negocio.
+
+## Stack tecnológico
+
+- Next.js 15.3.1
+- React 19
+- TypeScript 5.8
+- Tailwind CSS 3.4
+- Zod 4.4
+- Prisma 6.12
+- Vitest
+- jsPDF
+- html2canvas
+
+## Scripts disponibles
+
+- `npm run dev` Inicia el servidor de desarrollo.
+- `npm run build` Genera el build de producción.
+- `npm run start` Ejecuta la app construida.
+- `npm run lint` Ejecuta el lint.
+- `npm run test` Ejecuta Vitest.
+- `npm run test:watch` Ejecuta Vitest en modo observación.
+
+## Estructura general
+
+```text
+app/
+  api/
+  alerts/
+  analytics/
+  components/
+  products/
+  simulator/
+lib/
+prisma/
+public/
+__tests__/
 ```
 
-### GET /api/kpi
-Obtiene KPIs actuales
+## Documentación complementaria
+
+- `INSTALLATION.md` para la instalación paso a paso.
+- `GUIA_USO_SIMULADOR.md` para el uso detallado del simulador.
+- `API.md` para la documentación de endpoints.
+- `IMPLEMENTATION_PLAN.md` para el plan técnico.
+- `ESPECIFICACION_TECNICA.md` para el detalle funcional y de calidad.
+- `MODELO_DATOS.md` para el modelo de datos.
+- `SUMARIO_TECNICO.md` para una vista resumida del proyecto.
+
+## Pruebas
+
+Se incluyen pruebas automatizadas con Vitest para el motor de simulación, el componente de inversión y el flujo de escenarios guardados.
+
+Para ejecutar las pruebas:
 
 ```bash
-curl http://localhost:3000/api/kpi
-```
-
-**Respuesta:**
-```json
-{
-  "success": true,
-  "source": "fallback-mock",
-  "data": {
-    "date": "2026-05-03",
-    "totalOrders": 50,
-    "totalRevenue": 210000,
-    "averageTicket": 4250,
-    "occupancyRate": 72,
-    "margin": 68.5
-  },
-  "timestamp": "2026-05-03T23:08:32Z"
-}
-```
-
-Ver [API.md](./API.md) para documentación completa.
-
----
-
-## 🛠️ Stack Tecnológico
-
-| Aspecto | Tecnología |
-|--------|-----------|
-| Framework | Next.js 15+ (App Router) |
-| Lenguaje | TypeScript |
-| Estilos | Tailwind CSS |
-| Componentes | React 19 |
-| Validación | Zod |
-| ORM | Prisma (opcional) |
-| Testing | Vitest |
-| Exportación | jsPDF + html2canvas |
-
----
-
-## 📦 Dependencias Principales
-
-```json
-{
-  "dependencies": {
-    "next": "^15.3.1",
-    "react": "^19.0.0",
-    "react-dom": "^19.0.0",
-    "zod": "^4.4.2",
-    "jspdf": "^4.2.1",
-    "html2canvas": "^1.4.1",
-    "@prisma/client": "^6.12.0",
-    "prisma": "^6.12.0"
-  },
-  "devDependencies": {
-    "typescript": "^5.8.3",
-    "tailwindcss": "^3.4.17",
-    "autoprefixer": "^10.4.21",
-    "postcss": "^8.5.3"
-  }
-}
-```
-
----
-
-## 🧪 Testing
-
-Ejecutar tests:
-
-```bash
-# Tests unitarios
 npm run test
-
-# Watch mode
-npm run test:watch
-
-# Coverage
-npm run test:coverage
 ```
 
-Tests incluyen:
-- Lógica de simulación (VAN, TIR, Payback)
-- Validación de entrada (Zod schemas)
-- Componentes React
-- Integración API
+## Estado del proyecto
 
----
+El repositorio contiene un MVP funcional y completamente operacional con:
 
-## 📤 Exportación de Resultados
+### ✅ Implementado (RB1-RB5)
+- **RB1**: Autenticación y roles (middleware, session-based, protección de rutas)
+- **RB2**: Simulador persistente (guardar/editar/reutilizar escenarios en localStorage + API opcional)
+- **RB3**: Datos operacionales (inventario de stock, personal, métricas de capacidad en dashboard)
+- **RB4**: Alertas reales (motor de reglas conectado a KPIs y datos operacionales)
+- **RB5**: Reportes persistentes (historial de exportaciones, metadatos de simulaciones)
 
-El simulador permite exportar resultados en dos formatos:
+### ✅ Testing
+- 13 tests automatizados con Vitest (auth, operations, alerts, reports, components)
+- Cobertura de Unit Tests y Component Tests
 
-### PDF
-- Reporte ejecutivo con escenarios y gráficos
-- Análisis de riesgos
-- Recomendaciones
+### ⏳ Pendiente (No-funcional, opcional)
+- T077: Performance testing bajo carga
+- T078: Validación de concurrencia (5+ usuarios)
+- T079: Compatibilidad de navegadores
 
-### CSV
-- Datos tabulares para análisis en Excel/Sheets
-- Series de tiempo de flujos mensuales
-- KPIs por escenario
+La base de datos es opcional: el sistema sigue funcionando en modo demo sin `DATABASE_URL`.
 
----
+## Fiabilidad y Recuperación
 
-## 🌐 Modos de Ejecución
+- La aplicacion debe seguir funcionando en modo demo aunque no exista `DATABASE_URL`.
+- Si Prisma o PostgreSQL fallan, las rutas principales devuelven respuestas mock o degradadas sin bloquear el simulador.
+- Las simulaciones y escenarios guardados en el navegador se pueden recuperar desde `localStorage` mientras dure el perfil del usuario.
+- La disponibilidad objetivo es la de una demo local estable; no se define un SLA de produccion en esta fase.
 
-### Modo Demo (Predeterminado)
-- Sin `DATABASE_URL` requerida
-- Usa datos mock para KPIs
-- Simulaciones se calculan pero **no se persisten**
-- Perfecto para MVP y demostración
+## Licencia
 
-```bash
-npm run dev
-```
-
-### Modo Persistencia (Opcional)
-- Configura `DATABASE_URL` con PostgreSQL
-- Simula y guarda resultados en BD
-- Historial de simulaciones disponible
-- Recomendado para producción
-
-```bash
-export DATABASE_URL="postgresql://user:pass@localhost:5432/dss_cafe"
-npx prisma generate
-npm run dev
-```
-
----
-
-## 🎯 Casos de Uso
-
-### 1. Evaluar Viabilidad de Expansión
-Simula si invertir $1M en equipamiento y capacitación es rentable bajo distintos escenarios de demanda.
-
-### 2. Análisis de Sensibilidad
-Ajusta parámetros (órdenes diarias, ticket promedio) para ver cómo afectan VAN y Payback.
-
-### 3. Toma de Decisión Estratégica
-Compara 3 escenarios (optimista, realista, pesimista) para tomar decisiones informadas.
-
-### 4. Presentación a Inversores
-Exporta resultados en PDF para incluir en propuestas de financiamiento.
-
----
-
-## 📝 Guía Rápida: Cómo Usar el Simulador
-
-### Paso 1: Ingresar Parámetros
-En la página `/simulator`, ajusta los 4 controles deslizantes:
-
-| Parámetro | Rango | Valor Ejemplo |
-|-----------|-------|---------------|
-| Inversión Inicial | $100k - $10M | $800,000 |
-| Costo por Orden | $10 - $100 | $20 |
-| Pedidos Diarios | 10 - 200 | 50 |
-| Ticket Promedio | $1k - $50k | $10,000 |
-
-### Paso 2: Ejecutar Simulación
-Click en botón **"Ejecutar Simulación"** (verde)
-
-### Paso 3: Revisar Resultados
-Se mostrarán en tiempo real:
-- **Cards de Escenarios**: VAN, TIR, Payback para cada escenario
-- **Gráfico de Flujos**: Proyección mensual de ingresos
-- **Panel de Riesgos**: 4 factores evaluados
-
-### Paso 4: Exportar (Opcional)
-- **PDF**: Reporte profesional para presentaciones
-- **CSV**: Datos para análisis adicional
-
----
-
-## 🐛 Troubleshooting
-
-### "Error al conectar con la API"
-- Verifica que el servidor esté corriendo: `npm run dev`
-- Comprueba que estés en http://localhost:3000
-- Revisa la consola del navegador (F12)
-
-### "Los resultados no cambian al ajustar parámetros"
-- Espera a que se ejecute la validación (el botón debe estar habilitado)
-- Verifica los valores en los sliders
-- Recarga la página
-
-### "No puedo exportar a PDF"
-- Asegúrate de tener espacio en disco
-- Intenta con Chrome/Chromium
-- Revisa permisos de descarga
-
----
-
-## 📚 Documentación Adicional
-
-- [API.md](./API.md) - Referencia completa de endpoints
-- [IMPLEMENTATION_PLAN.md](./IMPLEMENTATION_PLAN.md) - Arquitectura técnica
-- [vitest.config.ts](./vitest.config.ts) - Configuración de tests
-
----
-
-## 🤝 Contribuciones
-
-Este es un proyecto MVP. Si deseas agregar features:
-
-1. Fork el repositorio
-2. Crea un branch: `git checkout -b feature/tu-feature`
-3. Commit cambios: `git commit -m "Agrega mi feature"`
-4. Push: `git push origin feature/tu-feature`
-5. Abre un Pull Request
-
----
-
-## 📄 Licencia
-
-Proyecto bajo licencia MIT - ver LICENSE para detalles
-
----
-
-## 👥 Autor
-
-**Enzo Gabriel** - Ingeniería en Software III
-Universidad - 2026
-
----
-
-## 💡 Notas para Presentación
-
-### Puntos Fuertes del MVP
-✅ Cálculo financiero robusto y preciso  
-✅ Interfaz intuitiva y moderna  
-✅ Sin dependencia de base de datos (demo inmediata)  
-✅ API REST documentada y funcional  
-✅ Exportación de resultados profesional  
-✅ TypeScript strict mode para calidad  
-
-### Posibles Extensiones Futuras
-- Dashboard en tiempo real con datos de BD
-- Autenticación y multi-usuario
-- Integraciones con sistemas de POS
-- Análisis predictivos con ML
-- Mobile app con React Native
-- GraphQL API
-
----
-
-## 📞 Soporte
-
-Para preguntas o problemas:
-- Abre un issue en GitHub
-- Contacta al autor
-
----
-
-**¡Gracias por usar DSS Pausa Cafe! 🚀**
+Proyecto académico/demo para uso interno y educativo.

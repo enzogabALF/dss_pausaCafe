@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState, type Dispatch, type SetStateAction } from 'react';
 import { SimulationInput } from '@/lib/simulation';
 import { SimulationInputSchema } from '@/lib/validations';
 
@@ -8,20 +8,45 @@ export interface InvestmentControlsProps {
   onSimulate: (input: SimulationInput) => void;
   isLoading?: boolean;
   fieldErrors?: Record<string, string>;
+  initialValues?: SimulationInput;
 }
 
-export function InvestmentControls({ onSimulate, isLoading = false, fieldErrors = {} }: InvestmentControlsProps) {
-  const [investment, setInvestment] = useState(800000);
-  const [costPercent, setCostPercent] = useState(20);
-  const [dailyOrders, setDailyOrders] = useState(50);
-  const [averageTicket, setAverageTicket] = useState(10000);
+const DEFAULT_VALUES: SimulationInput = {
+  initialInvestment: 800000,
+  costPerOrder: 20,
+  dailyOrders: 50,
+  averageTicket: 10000,
+};
+
+export function InvestmentControls({
+  onSimulate,
+  isLoading = false,
+  fieldErrors = {},
+  initialValues,
+}: InvestmentControlsProps) {
+  const [investment, setInvestment] = useState(initialValues?.initialInvestment ?? DEFAULT_VALUES.initialInvestment);
+  const [costPercent, setCostPercent] = useState(initialValues?.costPerOrder ?? DEFAULT_VALUES.costPerOrder);
+  const [dailyOrders, setDailyOrders] = useState(initialValues?.dailyOrders ?? DEFAULT_VALUES.dailyOrders);
+  const [averageTicket, setAverageTicket] = useState(initialValues?.averageTicket ?? DEFAULT_VALUES.averageTicket);
   const [hasChanged, setHasChanged] = useState(false);
   const [localErrors, setLocalErrors] = useState<Record<string, string>>({});
 
-  const handleChange = (setter: any, value: number) => {
+  useEffect(() => {
+    if (!initialValues) {
+      return;
+    }
+
+    setInvestment(initialValues.initialInvestment);
+    setCostPercent(initialValues.costPerOrder);
+    setDailyOrders(initialValues.dailyOrders);
+    setAverageTicket(initialValues.averageTicket);
+    setHasChanged(false);
+    setLocalErrors({});
+  }, [initialValues]);
+
+  const handleChange = (setter: Dispatch<SetStateAction<number>>, value: number) => {
     setter(value);
     setHasChanged(true);
-    // Limpiar errores locales al cambiar
     setLocalErrors({});
   };
 
@@ -33,12 +58,11 @@ export function InvestmentControls({ onSimulate, isLoading = false, fieldErrors 
       averageTicket: averageTicket,
     };
 
-    // Validar localmente antes de enviar
     const validation = SimulationInputSchema.safeParse(input);
-    
+
     if (!validation.success) {
       const errors: Record<string, string> = {};
-      validation.error.issues.forEach((err: any) => {
+      validation.error.issues.forEach((err) => {
         const field = String(err.path[0]);
         errors[field] = err.message;
       });
@@ -113,23 +137,18 @@ export function InvestmentControls({ onSimulate, isLoading = false, fieldErrors 
       </div>
 
       <div className="simulator-controls">
-        {controls.map((control: any) => {
+        {controls.map((control) => {
           const hasError = !!mergedErrors[control.field];
           return (
-            <label 
-              className="simulator-control" 
-              key={control.label}
-              style={{
-                borderColor: hasError ? '#ef4444' : undefined,
-                backgroundColor: hasError ? 'rgba(239, 68, 68, 0.05)' : undefined,
-              }}
-            >
+            <label className={`simulator-control ${hasError ? 'is-error' : ''}`} key={control.label}>
               <div className="simulator-control-header">
                 <strong>
                   {control.label}
-                  {hasError && <span style={{ color: '#ef4444', marginLeft: '4px' }}>*</span>}
+                  {hasError && <span className="simulator-control-required">*</span>}
                 </strong>
-                <span style={{ color: hasError ? '#ef4444' : (hasChanged ? 'var(--accent)' : 'var(--foreground)') }}>
+                <span
+                  className={`simulator-control-value ${hasError ? 'has-error' : hasChanged ? 'is-dirty' : ''}`}
+                >
                   {control.value}
                 </span>
               </div>
@@ -137,6 +156,7 @@ export function InvestmentControls({ onSimulate, isLoading = false, fieldErrors 
                 type="range"
                 min={control.min_val}
                 max={control.max_val}
+                className={`simulator-control-input ${hasError ? 'has-error' : ''}`}
                 value={
                   control.label === 'Inversión inicial'
                     ? investment
@@ -148,21 +168,13 @@ export function InvestmentControls({ onSimulate, isLoading = false, fieldErrors 
                 }
                 onChange={(e) => control.onChange(Number(e.target.value))}
                 aria-label={control.label}
-                style={{
-                  borderColor: hasError ? '#ef4444' : undefined,
-                }}
               />
               <div className="simulator-control-meta">
                 <span>{control.min}</span>
                 <span>{control.max}</span>
               </div>
               {hasError && (
-                <div style={{
-                  marginTop: '6px',
-                  fontSize: '0.75em',
-                  color: '#ef4444',
-                  fontWeight: '500',
-                }}>
+                <div className="simulator-control-error">
                   ⚠️ {mergedErrors[control.field]}
                 </div>
               )}
@@ -171,23 +183,11 @@ export function InvestmentControls({ onSimulate, isLoading = false, fieldErrors 
         })}
       </div>
 
-      <div style={{ display: 'flex', gap: '12px', marginTop: '16px' }}>
+      <div className="simulator-controls-actions">
         <button
           onClick={handleSimulate}
           disabled={isLoading || hasErrors}
-          className="simulator-button"
-          style={{
-            padding: '12px 24px',
-            backgroundColor: (isLoading || hasErrors) ? '#999' : 'var(--accent)',
-            color: '#000',
-            border: 'none',
-            borderRadius: '8px',
-            cursor: (isLoading || hasErrors) ? 'not-allowed' : 'pointer',
-            fontWeight: 'bold',
-            flex: 1,
-            transition: 'all 0.3s ease',
-            opacity: (isLoading || hasErrors) ? 0.6 : 1,
-          }}
+          className={`simulator-action-button primary ${isLoading || hasErrors ? 'is-disabled' : ''}`}
           title={hasErrors ? 'Corrige los errores de validación' : ''}
         >
           {isLoading ? '⏳ Simulando...' : '▶ Ejecutar Simulación'}
@@ -195,48 +195,20 @@ export function InvestmentControls({ onSimulate, isLoading = false, fieldErrors 
         <button
           onClick={handleReset}
           disabled={isLoading}
-          style={{
-            padding: '12px 24px',
-            backgroundColor: 'transparent',
-            color: 'var(--accent)',
-            border: '2px solid var(--accent)',
-            borderRadius: '8px',
-            cursor: isLoading ? 'not-allowed' : 'pointer',
-            fontWeight: 'bold',
-            transition: 'all 0.3s ease',
-            opacity: isLoading ? 0.6 : 1,
-          }}
+          className={`simulator-action-button secondary ${isLoading ? 'is-disabled' : ''}`}
         >
           ↻ Reset
         </button>
       </div>
 
       {hasErrors && (
-        <div
-          style={{
-            marginTop: '12px',
-            padding: '8px 12px',
-            backgroundColor: 'rgba(239, 68, 68, 0.1)',
-            borderLeft: '3px solid #ef4444',
-            fontSize: '0.85em',
-            color: '#ef4444',
-          }}
-        >
+        <div className="simulator-validation-message">
           ⚠️ Por favor, corrige los errores antes de continuar
         </div>
       )}
 
       {hasChanged && !hasErrors && (
-        <div
-          style={{
-            marginTop: '12px',
-            padding: '8px 12px',
-            backgroundColor: 'rgba(245, 162, 76, 0.1)',
-            borderLeft: '3px solid var(--accent)',
-            fontSize: '0.85em',
-            color: 'var(--accent)',
-          }}
-        >
+        <div className="simulator-change-message">
           ⚡ Los parámetros cambiaron - haz clic en "Ejecutar Simulación" para actualizar
         </div>
       )}

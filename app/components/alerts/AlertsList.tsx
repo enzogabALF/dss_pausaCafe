@@ -1,81 +1,48 @@
-export interface Alert {
-  id: string;
-  title: string;
-  description: string;
-  priority: 'critical' | 'warning' | 'info';
-  category: string;
-  scenario: 'Favorable' | 'Normal' | 'Desfavorable';
-  timestamp: string;
-  actionable: boolean;
-}
+'use client';
 
-const MOCK_ALERTS: Alert[] = [
-  {
-    id: '1',
-    title: 'Margen crítico detectado',
-    description: 'Los márgenes en bebidas frías cayeron 8% en la última semana.',
-    priority: 'critical',
-    category: 'Rentabilidad',
-    scenario: 'Desfavorable',
-    timestamp: 'Hace 2 horas',
-    actionable: true,
-  },
-  {
-    id: '2',
-    title: 'Oportunidad de upsell',
-    description: 'Incrementar ticket promedio con combos de desayuno + bebida premium.',
-    priority: 'warning',
-    category: 'Ventas',
-    scenario: 'Favorable',
-    timestamp: 'Hace 4 horas',
-    actionable: true,
-  },
-  {
-    id: '3',
-    title: 'Stock bajo en Croissant Clásico',
-    description: 'Inventario por debajo del 30%. Reorden recomendada.',
-    priority: 'warning',
-    category: 'Inventario',
-    scenario: 'Normal',
-    timestamp: 'Hace 6 horas',
-    actionable: true,
-  },
-  {
-    id: '4',
-    title: 'Ocupación óptima en horario peak',
-    description: 'Entre 12:00 y 14:00 alcanzamos 92% de ocupación. Excelente.',
-    priority: 'info',
-    category: 'Operaciones',
-    scenario: 'Favorable',
-    timestamp: 'Hace 8 horas',
-    actionable: false,
-  },
-  {
-    id: '5',
-    title: 'Demanda de bebidas especiales en alza',
-    description: 'Aumento 24% en solicitudes. Considerar expansión de carta.',
-    priority: 'warning',
-    category: 'Producto',
-    scenario: 'Favorable',
-    timestamp: 'Hace 12 horas',
-    actionable: true,
-  },
-  {
-    id: '6',
-    title: 'Meta de ventas alcanzada',
-    description: 'Hemos superado la meta del mes en 15%. Excelente desempeño.',
-    priority: 'info',
-    category: 'Ventas',
-    scenario: 'Favorable',
-    timestamp: 'Ayer',
-    actionable: false,
-  },
-];
+import { useEffect, useMemo, useState } from 'react';
+import type { Alert } from '@/lib/types';
 
 export default function AlertsList() {
-  const criticalAlerts = MOCK_ALERTS.filter((a) => a.priority === 'critical');
-  const warningAlerts = MOCK_ALERTS.filter((a) => a.priority === 'warning');
-  const infoAlerts = MOCK_ALERTS.filter((a) => a.priority === 'info');
+  const [alerts, setAlerts] = useState<Alert[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    let mounted = true;
+
+    const loadAlerts = async () => {
+      try {
+        const endpoint = new URL('/api/alerts', window.location.origin || 'http://localhost').toString();
+        const response = await fetch(endpoint);
+        const payload = await response.json();
+        if (mounted && Array.isArray(payload?.data)) {
+          setAlerts(payload.data as Alert[]);
+        }
+      } catch (error) {
+        console.error('No se pudieron cargar las alertas:', error);
+      } finally {
+        if (mounted) {
+          setLoading(false);
+        }
+      }
+    };
+
+    loadAlerts();
+
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
+  const grouped = useMemo(() => ({
+    criticalAlerts: alerts.filter((a) => a.priority === 'critical'),
+    warningAlerts: alerts.filter((a) => a.priority === 'warning'),
+    infoAlerts: alerts.filter((a) => a.priority === 'info'),
+  }), [alerts]);
+
+  if (loading) {
+    return <div className="alerts-list-container">Cargando alertas...</div>;
+  }
 
   const renderAlert = (alert: Alert) => (
     <div key={alert.id} className={`alert-card alert-${alert.priority}`}>
@@ -116,32 +83,29 @@ export default function AlertsList() {
 
   return (
     <div className="alerts-list-container">
-      {/* Alertas Críticas */}
-      {criticalAlerts.length > 0 && (
+      {grouped.criticalAlerts.length > 0 && (
         <section className="alerts-section">
-          <h3>🚨 Alertas Críticas ({criticalAlerts.length})</h3>
+          <h3>🚨 Alertas Críticas ({grouped.criticalAlerts.length})</h3>
           <div className="alerts-group">
-            {criticalAlerts.map(renderAlert)}
+            {grouped.criticalAlerts.map(renderAlert)}
           </div>
         </section>
       )}
 
-      {/* Advertencias */}
-      {warningAlerts.length > 0 && (
+      {grouped.warningAlerts.length > 0 && (
         <section className="alerts-section">
-          <h3>⚠️ Advertencias ({warningAlerts.length})</h3>
+          <h3>⚠️ Advertencias ({grouped.warningAlerts.length})</h3>
           <div className="alerts-group">
-            {warningAlerts.map(renderAlert)}
+            {grouped.warningAlerts.map(renderAlert)}
           </div>
         </section>
       )}
 
-      {/* Información */}
-      {infoAlerts.length > 0 && (
+      {grouped.infoAlerts.length > 0 && (
         <section className="alerts-section">
-          <h3>ℹ️ Información ({infoAlerts.length})</h3>
+          <h3>ℹ️ Información ({grouped.infoAlerts.length})</h3>
           <div className="alerts-group">
-            {infoAlerts.map(renderAlert)}
+            {grouped.infoAlerts.map(renderAlert)}
           </div>
         </section>
       )}

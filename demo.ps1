@@ -1,228 +1,177 @@
 #!/usr/bin/env pwsh
-# Script de Demostración Interactiva - DSS Pausa Cafe
-# Uso: pwsh demo.ps1
-# Funciona en Windows PowerShell 5.1+
+# DSS Pausa Cafe - Script de demostracion
+# Uso: pwsh -File .\demo.ps1
 
-$ErrorActionPreference = "Stop"
+$ErrorActionPreference = 'Stop'
 
-# Colores para terminal
-$colors = @{
-    Reset = "`e[0m"
-    Bold = "`e[1m"
-    Green = "`e[32m"
-    Blue = "`e[34m"
-    Yellow = "`e[33m"
-    Red = "`e[31m"
-    Cyan = "`e[36m"
+$projectRoot = Split-Path -Parent $MyInvocation.MyCommand.Path
+Set-Location $projectRoot
+
+function Write-Section {
+    param([string]$Text)
+    Write-Host ""
+    Write-Host "==== $Text ===="
 }
 
-function Write-Title {
-    param([string]$text)
-    Write-Host "`n$($colors.Bold)$($colors.Cyan)==== $text ====$($colors.Reset)`n"
+function Write-Ok {
+    param([string]$Text)
+    Write-Host "[OK] $Text"
 }
 
-function Write-Success {
-    param([string]$text)
-    Write-Host "$($colors.Green)✓ $text$($colors.Reset)"
+function Write-WarnText {
+    param([string]$Text)
+    Write-Host "[WARN] $Text"
 }
 
-function Write-Error-Custom {
-    param([string]$text)
-    Write-Host "$($colors.Red)✗ $text$($colors.Reset)"
+function Write-InfoText {
+    param([string]$Text)
+    Write-Host "[INFO] $Text"
 }
 
-function Write-Info {
-    param([string]$text)
-    Write-Host "$($colors.Blue)ℹ $text$($colors.Reset)"
-}
-
-# Banner
-Clear-Host
-Write-Host "$($colors.Bold)$($colors.Cyan)"
-Write-Host "╔════════════════════════════════════════════════════════╗"
-Write-Host "║   DSS PAUSA CAFE - Sistema de Soporte de Decisiones   ║"
-Write-Host "║          Script de Demostración Interactiva           ║"
-Write-Host "╚════════════════════════════════════════════════════════╝"
-Write-Host "$($colors.Reset)`n"
-
-# Verificaciones previas
-Write-Title "1. VERIFICANDO REQUISITOS"
-
-# Verificar Node.js
-try {
-    $nodeVersion = node --version
-    Write-Success "Node.js instalado: $nodeVersion"
-} catch {
-    Write-Error-Custom "Node.js no encontrado. Descarga desde https://nodejs.org"
-    exit 1
-}
-
-# Verificar npm
-try {
-    $npmVersion = npm --version
-    Write-Success "npm instalado: $npmVersion"
-} catch {
-    Write-Error-Custom "npm no encontrado"
-    exit 1
-}
-
-# Verificar if estamos en el directorio correcto
-if (-not (Test-Path "package.json")) {
-    Write-Error-Custom "No estamos en el directorio del proyecto"
-    Write-Info "Ejecuta este script desde la carpeta dss_pausaCafe"
-    exit 1
-}
-Write-Success "Estamos en el directorio correcto"
-
-# Verificar puerto 3000
-Write-Title "2. VERIFICANDO PUERTO 3000"
-
-$portInUse = netstat -ano 2>$null | Select-String ":3000"
-if ($portInUse) {
-    Write-Error-Custom "Puerto 3000 ya está en uso"
-    Write-Info "Para liberar el puerto, ejecuta en otra terminal:"
-    Write-Host "$($colors.Yellow)  netstat -ano | findstr :3000"
-    Write-Host "  taskkill /PID <PID> /F$($colors.Reset)"
-    exit 1
-} else {
-    Write-Success "Puerto 3000 disponible"
-}
-
-# Verificar dependencias
-Write-Title "3. VERIFICANDO DEPENDENCIAS"
-
-if (Test-Path "node_modules") {
-    Write-Success "node_modules encontrado"
-} else {
-    Write-Info "node_modules no encontrado, instalando dependencias..."
-    npm install
-    if ($LASTEXITCODE -ne 0) {
-        Write-Error-Custom "Error al instalar dependencias"
-        exit 1
+function Test-ProjectRoot {
+    if (-not (Test-Path 'package.json')) {
+        throw 'Este script debe ejecutarse desde la carpeta del proyecto dss_pausaCafe.'
     }
-    Write-Success "Dependencias instaladas"
 }
 
-# Preguntar qué demostración realizar
-Write-Title "4. SELECCIONA UNA DEMOSTRACIÓN"
+function Ensure-Dependencies {
+    if (-not (Test-Path 'node_modules')) {
+        Write-Section 'Instalando dependencias'
+        npm install
+        if ($LASTEXITCODE -ne 0) {
+            throw 'npm install fallo.'
+        }
+        Write-Ok 'Dependencias instaladas.'
+    }
+    else {
+        Write-Ok 'Dependencias detectadas.'
+    }
+}
 
-Write-Host "$($colors.Bold)Opciones:$($colors.Reset)"
-Write-Host "1) Iniciar servidor (modo normal)"
-Write-Host "2) Ejecutar simulaciones de prueba (sin servidor)"
-Write-Host "3) Ambas (servidor + pruebas en otra ventana)"
-Write-Host "4) Ver documentación"
-Write-Host ""
+function Test-ApiReady {
+    try {
+        Invoke-RestMethod -Uri 'http://localhost:3000/api/kpi' -TimeoutSec 3 | Out-Null
+        return $true
+    }
+    catch {
+        return $false
+    }
+}
 
-$option = Read-Host "Selecciona una opción (1-4)"
+function Start-DevServer {
+    Write-Section 'Servidor de desarrollo'
+    Write-InfoText 'Se ejecuta en esta ventana. Abre http://localhost:3000 cuando termine de arrancar.'
+    npm run dev
+}
 
-switch ($option) {
-    "1" {
-        Write-Title "INICIANDO SERVIDOR DE DESARROLLO"
-        Write-Info "Se abrirá en http://localhost:3000"
-        Write-Info "Presiona Ctrl+C para detener"
+function Show-DemoSimulations {
+    Write-Section 'Demo de simulacion'
+
+    if (-not (Test-ApiReady)) {
+        Write-WarnText 'El servidor no esta disponible en http://localhost:3000.'
+        Write-InfoText 'Primero ejecuta la opcion 1 para iniciar el servidor.'
+        return
+    }
+
+    $cases = @(
+        @{ Name = 'Base demo'; InitialInvestment = 800000; CostPerOrder = 20; DailyOrders = 50; AverageTicket = 10000 },
+        @{ Name = 'Inversion alta'; InitialInvestment = 2000000; CostPerOrder = 15; DailyOrders = 80; AverageTicket = 15000 },
+        @{ Name = 'Escenario conservador'; InitialInvestment = 500000; CostPerOrder = 25; DailyOrders = 35; AverageTicket = 8000 }
+    )
+
+    foreach ($case in $cases) {
         Write-Host ""
-        npm run dev
-    }
-    "2" {
-        Write-Title "EJECUTANDO SIMULACIONES DE PRUEBA"
-        
-        # Verificar que el servidor está corriendo
-        $server = Start-Process node -ArgumentList "-e `"const http = require('http'); const { spawn } = require('child_process'); const proc = spawn('npm', ['run', 'dev'], { cwd: '$PWD' }); process.on('SIGINT', () => { proc.kill(); process.exit(0); });`" -PassThru -WindowStyle Hidden
-        
-        Start-Sleep -Seconds 3
-        
-        $testCases = @(
-            @{name="Favorable"; inv=800000; cost=20; orders=50; ticket=10000},
-            @{name="Normal"; inv=500000; cost=25; orders=40; ticket=8000},
-            @{name="Desfavorable"; inv=300000; cost=30; orders=25; ticket=5000}
-        ),
-        @{name="Inversión Alta"; inv=2000000; cost=15; orders=80; ticket=15000}
-        
-        foreach ($test in $testCases) {
-            Write-Host "`n$($colors.Bold)Ejecutando: $($test.name)$($colors.Reset)"
-            Write-Info "Inversión: \$$($test.inv | FormatNumber) | Costo: \$$($test.cost) | Órdenes: $($test.orders) | Ticket: \$$($test.ticket | FormatNumber)"
-            
-            $body = @{
-                initialInvestment = $test.inv
-                costPerOrder = $test.cost
-                dailyOrders = $test.orders
-                averageTicket = $test.ticket
-            } | ConvertTo-Json
-            
-            try {
-                $response = Invoke-WebRequest -Uri "http://localhost:3000/api/simulations" `
-                    -Method POST `
-                    -ContentType "application/json" `
-                    -Body $body `
-                    -UseBasicParsing `
-                    -TimeoutSec 10 `
-                    -ErrorAction SilentlyContinue
-                
-                $result = $response.Content | ConvertFrom-Json
-                
-                if ($result.success) {
-                    Write-Success "Simulación exitosa"
-                    Write-Host "  VAN Favorable:      \$$($result.data.favorable.van | FormatNumber)"
-                    Write-Host "  TIR Favorable:      $($result.data.favorable.tir.ToString('F2'))%"
-                    Write-Host "  Payback Favorable:  $($result.data.favorable.payback.ToString('F2')) meses"
-                    Write-Host ""
-                    Write-Host "  VAN Normal:         \$$($result.data.normal.van | FormatNumber)"
-                    Write-Host "  TIR Normal:         $($result.data.normal.tir.ToString('F2'))%"
-                    Write-Host "  Payback Normal:     $($result.data.normal.payback.ToString('F2')) meses"
-                    Write-Host ""
-                    Write-Host "  Riesgos:"
-                    Write-Host "    - Dólar: $($result.data.risks.dolarVariation)%"
-                    Write-Host "    - Demanda: $($result.data.risks.demandVariation)%"
-                    Write-Host "    - Competencia: $($result.data.risks.competitionVariation)%"
-                    Write-Host "    - Energía: $($result.data.risks.energyCostVariation)%"
-                } else {
-                    Write-Error-Custom "Error en simulación: $($result.error)"
-                }
-            } catch {
-                Write-Error-Custom "No se pudo conectar: $_"
+        Write-Host ("Caso: {0}" -f $case.Name)
+
+        $body = @{
+            initialInvestment = $case.InitialInvestment
+            costPerOrder = $case.CostPerOrder
+            dailyOrders = $case.DailyOrders
+            averageTicket = $case.AverageTicket
+        } | ConvertTo-Json
+
+        try {
+            $response = Invoke-RestMethod -Uri 'http://localhost:3000/api/simulations' -Method Post -ContentType 'application/json' -Body $body -TimeoutSec 15
+
+            if ($response.success) {
+                Write-Ok ('VAN normal: {0}' -f ([math]::Round($response.data.normal.van, 0).ToString('N0')))
+                Write-Ok ('TIR normal: {0}%' -f ($response.data.normal.tir.ToString('F2')))
+                Write-Ok ('Payback normal: {0} meses' -f ($response.data.normal.payback.ToString('F2')))
+                Write-InfoText ('Riesgo total: {0}%' -f ($response.data.risks.totalImpact.ToString('F1')))
             }
-            
-            Start-Sleep -Seconds 1
+            else {
+                Write-WarnText ('La API devolvio un error: {0}' -f $response.error)
+            }
         }
-        
-        Write-Host "`n$($colors.Green)✓ Pruebas completadas$($colors.Reset)`n"
-        
-        # Detener servidor
-        Stop-Process -InputObject $server -Force -ErrorAction SilentlyContinue
-    }
-    "3" {
-        Write-Title "INICIANDO MODO DUAL"
-        Write-Info "1. Se inicia el servidor en esta ventana"
-        Write-Info "2. Las pruebas se ejecutarán en paralelo"
-        Write-Info "Presiona Ctrl+C para detener todo"
-        
-        # Aquí simplemente iniciamos el servidor
-        # Las pruebas podrían ejecutarse en PowerShell paralelo
-        npm run dev
-    }
-    "4" {
-        Write-Title "DOCUMENTACIÓN"
-        
-        $docs = @{
-            "README.md" = "Descripción completa del proyecto"
-            "INSTALLATION.md" = "Guía paso a paso de instalación"
-            "API.md" = "Referencia de endpoints REST"
-            "IMPLEMENTATION_PLAN.md" = "Arquitectura técnica"
+        catch {
+            Write-WarnText ('No se pudo ejecutar la simulacion: {0}' -f $_.Exception.Message)
         }
-        
-        Write-Host "$($colors.Bold)Archivos de documentación disponibles:$($colors.Reset)"
-        $docs.GetEnumerator() | ForEach-Object {
-            Write-Host "  - $($_.Key): $($_.Value)"
-        }
-        
-        Write-Host "`n$($colors.Yellow)Para abrir un archivo, usa:$($colors.Reset)"
-        Write-Host "  notepad README.md"
-        Write-Host "  or"
-        Write-Host "  code README.md"
-    }
-    default {
-        Write-Error-Custom "Opción inválida"
     }
 }
 
-Write-Host "`n$($colors.Green)¡Listo!$($colors.Reset)`n"
+function Open-App {
+    Write-Section 'Abrir aplicacion'
+    if (-not (Test-ApiReady)) {
+        Write-WarnText 'El servidor no esta listo todavia.'
+        return
+    }
+
+    Start-Process 'http://localhost:3000'
+    Write-Ok 'Se abrio el navegador en http://localhost:3000'
+}
+
+function Show-Documentation {
+    Write-Section 'Documentacion disponible'
+
+    $docs = @(
+        'README.md',
+        'INSTALLATION.md',
+        'GUIA_USO_SIMULADOR.md',
+        'API.md',
+        'IMPLEMENTATION_PLAN.md'
+    )
+
+    foreach ($doc in $docs) {
+        Write-Host ('- {0}' -f $doc)
+    }
+}
+
+function Show-Menu {
+    Write-Host ''
+    Write-Host 'DSS Pausa Cafe - Demo'
+    Write-Host '1) Iniciar servidor de desarrollo'
+    Write-Host '2) Ejecutar demo de simulaciones'
+    Write-Host '3) Abrir la aplicacion en el navegador'
+    Write-Host '4) Ver documentacion'
+    Write-Host '0) Salir'
+}
+
+try {
+    Clear-Host
+    Write-Host 'DSS Pausa Cafe - Script de demostracion'
+    Write-Host '========================================'
+
+    Test-ProjectRoot
+    Write-Ok ('Node.js: {0}' -f (node --version))
+    Write-Ok ('npm: {0}' -f (npm --version))
+    Ensure-Dependencies
+
+    do {
+        Show-Menu
+        $choice = Read-Host 'Selecciona una opcion'
+
+        switch ($choice) {
+            '1' { Start-DevServer }
+            '2' { Show-DemoSimulations }
+            '3' { Open-App }
+            '4' { Show-Documentation }
+            '0' { Write-Ok 'Saliendo.' }
+            default { Write-WarnText 'Opcion invalida.' }
+        }
+    } while ($choice -ne '0')
+}
+catch {
+    Write-Host ''
+    Write-Host ('[ERROR] {0}' -f $_.Exception.Message)
+    exit 1
+}

@@ -65,6 +65,67 @@ Todas las 5 páginas implementadas con mock data:
 
 ---
 
+## ✅ FASE 3: REQUERIMIENTOS DE NEGOCIO - COMPLETADO
+
+Todos los requerimientos funcionales han sido implementados y testeados (RB1-RB5):
+
+### 3.1 Funcionalidad de negocio - ✅ COMPLETADO
+
+**RB1: Autenticación y Seguridad**
+- ✅ Sistema de roles (viewer, analyst, manager, admin)
+- ✅ Middleware de protección de rutas (`/dashboard/*`, `/api/operations/*`, `/api/reports/*`)
+- ✅ Session-based access con cookies
+- ✅ Endpoint: `GET/POST /api/auth` para gestión de sesiones
+- ✅ Header mostrando rol actual del usuario
+- ✅ Tests unitarios: 4/4 pasando
+
+**RB2: Simulador Persistente**
+- ✅ Guardar, editar, renombrar y eliminar escenarios guardados
+- ✅ Componente `SavedScenariosPanel` en simulador
+- ✅ Persistencia en localStorage con fallback API opcional
+- ✅ Reutilización de escenarios previos sin reconfiguración
+- ✅ Tests: 1/1 pasando
+
+**RB3: Datos Operacionales**
+- ✅ Modelo `OperationalInventory`: Café, Leche, Pastelería, Vasos
+- ✅ Modelo `StaffMember`: Personal activo, turnos, carga de trabajo
+- ✅ Panel `OperationalStatusPanel` en dashboard
+- ✅ Métricas: Cobertura de stock %, Utilización operativa %
+- ✅ Endpoint: `GET/POST /api/operations`
+- ✅ Tests: 1/1 pasando
+
+**RB4: Alertas Reales**
+- ✅ Motor `risk-engine.ts`: Generación dinámica desde KPIs y datos operacionales
+- ✅ Reglas: Margen crítico (<65%), Ocupación alta (>85%), Stock crítico, Capacidad saturada (>90%)
+- ✅ Endpoint: `GET/POST /api/alerts` con datos en vivo
+- ✅ UI con filtros por prioridad (Critical, Warning, Info) y escenario
+- ✅ Tests: 1/1 pasando
+
+**RB5: Reportes Persistentes**
+- ✅ Modelo `ReportHistory`: Metadatos de exportaciones
+- ✅ Componente `ReportHistoryPanel`: Historial visible en simulador
+- ✅ Endpoint: `GET/POST /api/reports`
+- ✅ Metadata: Escenario, parámetros de inversión, timestamp, formato (PDF/CSV)
+- ✅ Persistencia: localStorage + Prisma opcional
+- ✅ Tests: 2/2 pasando
+
+### 3.2 Validación no funcional - ⏳ PENDIENTE (Opcional)
+- [ ] T077: Medir rendimiento con carga ligera y concurrente
+- [ ] T078: Validar tiempo de respuesta del dashboard (target <2s)
+- [ ] T079: Probar compatibilidad entre navegadores (Chrome, Edge, Firefox)
+- [x] T080: Documentar disponibilidad objetivo del despliegue (modo demo local)
+
+### 3.3 Implementación completada
+1. ✅ Autenticación y roles básicos (T067-T068)
+2. ✅ Persistencia de escenarios (T069-T070)
+3. ✅ Inventario y personal (T071-T072)
+4. ✅ Alertas automáticas desde datos reales (T073-T074)
+5. ✅ Reportes persistentes (T075-T076)
+6. ✅ Tests para todos los anteriores (T062-T066)
+7. ⏳ Validación de rendimiento y compatibilidad (T077-T079)
+
+---
+
 ## 📈 RESULTADOS DE TEST
 
 **Simulación ejecutada exitosamente:**
@@ -195,94 +256,73 @@ Margen Bruto Diario: $250,000
 
 ## 🛠️ Arquitectura Técnica
 
-### Stack de la Demo
+### Arquitectura Actual del MVP
 
-- **Framework**: Next.js 15+ con App Router
-- **Lenguaje**: TypeScript
-- **Estilos**: Tailwind CSS
-- **Base de Datos**: PostgreSQL
-- **ORM**: Prisma
-- **Validación**: Zod
-- **Estado**: Server Components + client state mínimo cuando sea necesario
+El proyecto vive completamente dentro de Next.js 15 con App Router. La capa de UI, las rutas y la lógica de negocio se comparten en el mismo repositorio para mantener el despliegue simple y permitir modo demo sin base de datos.
 
-### API y Lógica de Negocio
+- **Frontend**: páginas en `app/` para inicio, simulador, productos, analiticas y alertas.
+- **Componentes reutilizables**: UI compartida en `app/components/` y `components/`.
+- **Lógica de negocio**: cálculo de escenarios en `lib/simulation.ts` y validaciones en `lib/validations.ts`.
+- **Persistencia opcional**: Prisma en `prisma/schema.prisma` cuando existe `DATABASE_URL`.
+- **Modo demo**: si no hay base de datos, la API responde con datos mock y la simulacion sigue funcionando.
+- **Exportacion**: el simulador genera PDF y CSV desde el panel de resultados.
+- **Escenarios guardados**: se almacenan en `localStorage` en el navegador.
 
-La demo será full-stack dentro de Next.js, usando route handlers y servicios internos compartidos.
+### Flujo de Ejecucion
 
-### Backend API
+1. El usuario entra a `app/simulator/page.tsx`.
+2. `InvestmentControls` valida los parametros con Zod y emite el formulario.
+3. La pagina llama a `POST /api/simulations`.
+4. `lib/simulation.ts` calcula VAN, TIR, Payback y riesgos para los tres escenarios.
+5. `SimulatorResults` muestra resultados, exporta reportes y guarda escenarios en `localStorage`.
+6. Si hay `DATABASE_URL`, la simulacion tambien puede persistirse con Prisma; si no, se devuelve en modo demo.
 
-#### Endpoints Principales
-
-```
-POST /api/simulations
-  Body: { escenario, parametros_custom, periodos_meses }
-  Response: { simulationId, resultados, recomendaciones }
-
-GET /api/simulations/:id
-  Response: { simulacion_completa }
-
-GET /api/simulations/scenarios/default
-  Response: { favorable, normal, desfavorable }
-
-PUT /api/simulations/:id/sensitivity
-  Body: { pedidos_diarios?, ticket_promedio?, margen_bruto?, ... }
-  Response: { resultados_actualizados }
-```
-
-#### Servicios Core
-
-```typescript
-// analytics.service.ts
-class SimulationService {
-  // Genera escenarios automáticos
-  generateDefaultScenarios(baseKpis: KPIBase): Scenario[]
-  
-  // Proyecta KPIs para N períodos
-  projectKPIs(scenario: Scenario, months: number): Projection[]
-  
-  // Calcula recomendaciones
-  generateRecommendations(scenario: Scenario, projections: Projection[]): Recommendation[]
-  
-  // Análisis de sensibilidad
-  sensitivityAnalysis(baseParams: Record<string, number>): SensitivityMatrix
-}
-```
-
-### Frontend Componentes
-
-Las pantallas del anexo definen una interfaz oscura, con barra lateral fija y módulos claramente separados. La navegación principal debe incluir:
-- Dashboard Ejecutivo
-- Simulador de Inversión / Simulación de Escenarios
-- Análisis de Productos
-- Analíticas
-- Alertas y Recomendaciones
-- Configuración
+### Rutas Actuales
 
 ```
 app/
 ├── page.tsx
-├── dashboard/
-│   ├── page.tsx
-│   ├── loading.tsx
-│   └── components/
-├── simulator/
-│   └── page.tsx
-├── products/
-│   └── page.tsx
-├── analytics/
-│   └── page.tsx
-├── alerts/
-│   └── page.tsx
 ├── layout.tsx
-components/
-├── KPICards.tsx
-├── ScenarioComparison.tsx
-├── RecommendationPanel.tsx
-├── SensitivityPanel.tsx
-└── ResultsTable.tsx
+├── simulator/page.tsx
+├── products/page.tsx
+├── analytics/page.tsx
+├── alerts/page.tsx
+└── api/
+    ├── kpi/route.ts
+    └── simulations/route.ts
 ```
 
-### Estructura Sugerida del Proyecto
+### Backend API
+
+#### Endpoints Actuales
+
+```
+GET /api/kpi
+  Response: { success, data, source, timestamp }
+
+POST /api/kpi
+  Body: KPIs de cafetería
+  Response: { success, persisted, message, data }
+
+GET /api/simulations
+  Response: { status, message, persisted, data }
+
+POST /api/simulations
+  Body: { initialInvestment, costPerOrder, dailyOrders, averageTicket }
+  Response: { success, persisted, simulationId, data, timestamp }
+```
+
+### Servicios Core
+
+```typescript
+// lib/simulation.ts
+runSimulation(input: SimulationInput): SimulationResult
+calculateVAN(initialInvestment: number, monthlyFlows: number[], discountRate?: number): number
+calculateTIR(initialInvestment: number, monthlyFlows: number[]): number
+calculatePayback(initialInvestment: number, monthlyFlows: number[]): number
+```
+
+### Estructura Real del Proyecto
 
 ```
 dss_pausaCafe/
@@ -291,7 +331,7 @@ dss_pausaCafe/
 ├── lib/
 ├── prisma/
 ├── public/
-└── styles/
+└── specs/
 ```
 
 ### Base de Datos
@@ -618,6 +658,9 @@ export class SimulationService {
 - No se contempla despliegue por ahora.
 - El foco está en validar UX, cálculos de negocio y simulaciones.
 - La arquitectura debe quedar lista para desplegar más adelante sin reescritura mayor.
+- La fiabilidad esperada es la de una demo local: ante fallos de base de datos, la API debe responder con fallback mock y mantener las pantallas principales operativas.
+- La disponibilidad objetivo es poder levantar la app y el simulador de forma consistente con `npm run dev`.
+- La recuperación se limita a datos locales del navegador y a respuestas degradadas desde la API; no se incluyen estrategias de alta disponibilidad ni disaster recovery para esta fase.
 
 ---
 

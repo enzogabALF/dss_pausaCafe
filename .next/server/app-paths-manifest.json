@@ -1,9 +1,6 @@
 {
-  "/api/simulations/route": "app/api/simulations/route.js",
-  "/api/kpi/route": "app/api/kpi/route.js",
   "/page": "app/page.js",
   "/simulator/page": "app/simulator/page.js",
-  "/products/page": "app/products/page.js",
-  "/analytics/page": "app/analytics/page.js",
-  "/alerts/page": "app/alerts/page.js"
+  "/alerts/page": "app/alerts/page.js",
+  "/analytics/page": "app/analytics/page.js"
 }

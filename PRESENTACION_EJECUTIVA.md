@@ -289,8 +289,8 @@ R: En demo no se guardan. Con BD, se guardan indefinidamente y se pueden auditar
 
 ## 📞 Contacto
 
-**Desarrollador**: Enzo Gabriel  
-**Email**: enzo.gabriel@example.com  
+**Desarrollador**: Enzo Gabriel Alfonso  
+**Email**: genzo543@Gmail.com  
 **GitHub**: https://github.com/enzogabALF/dss_pausaCafe
 
 ---

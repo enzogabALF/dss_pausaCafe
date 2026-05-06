@@ -16,6 +16,11 @@
       "static/chunks/main-app.js",
       "static/chunks/app/api/kpi/route.js"
     ],
+    "/api/operations/route": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/api/operations/route.js"
+    ],
     "/simulator/page": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
@@ -26,20 +31,10 @@
       "static/chunks/main-app.js",
       "static/chunks/app/api/simulations/route.js"
     ],
-    "/products/page": [
+    "/api/reports/route": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
-      "static/chunks/app/products/page.js"
-    ],
-    "/analytics/page": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/chunks/app/analytics/page.js"
-    ],
-    "/alerts/page": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/chunks/app/alerts/page.js"
+      "static/chunks/app/api/reports/route.js"
     ]
   }
 }

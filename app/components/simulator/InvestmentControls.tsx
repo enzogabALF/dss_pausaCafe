@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, type Dispatch, type SetStateAction } from 'react';
+import { useEffect, useState, type Dispatch, type SetStateAction, useRef } from 'react';
 import { SimulationInput } from '@/lib/simulation';
 import { SimulationInputSchema } from '@/lib/validations';
 
@@ -18,6 +18,8 @@ const DEFAULT_VALUES: SimulationInput = {
   averageTicket: 10000,
 };
 
+const DEBOUNCE_DELAY = 500; // ms para esperar antes de ejecutar simulación
+
 export function InvestmentControls({
   onSimulate,
   isLoading = false,
@@ -28,8 +30,8 @@ export function InvestmentControls({
   const [costPercent, setCostPercent] = useState(initialValues?.costPerOrder ?? DEFAULT_VALUES.costPerOrder);
   const [dailyOrders, setDailyOrders] = useState(initialValues?.dailyOrders ?? DEFAULT_VALUES.dailyOrders);
   const [averageTicket, setAverageTicket] = useState(initialValues?.averageTicket ?? DEFAULT_VALUES.averageTicket);
-  const [hasChanged, setHasChanged] = useState(false);
   const [localErrors, setLocalErrors] = useState<Record<string, string>>({});
+  const debounceTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
     if (!initialValues) {
@@ -40,14 +42,53 @@ export function InvestmentControls({
     setCostPercent(initialValues.costPerOrder);
     setDailyOrders(initialValues.dailyOrders);
     setAverageTicket(initialValues.averageTicket);
-    setHasChanged(false);
     setLocalErrors({});
   }, [initialValues]);
 
+  // Efecto reactivo: ejecuta simulación cuando los valores cambian
+  useEffect(() => {
+    // Limpiar timeout anterior
+    if (debounceTimeoutRef.current) {
+      clearTimeout(debounceTimeoutRef.current);
+    }
+
+    const input = {
+      initialInvestment: investment,
+      costPerOrder: costPercent,
+      dailyOrders: dailyOrders,
+      averageTicket: averageTicket,
+    };
+
+    // Validar primero
+    const validation = SimulationInputSchema.safeParse(input);
+
+    if (!validation.success) {
+      const errors: Record<string, string> = {};
+      validation.error.issues.forEach((err) => {
+        const field = String(err.path[0]);
+        errors[field] = err.message;
+      });
+      setLocalErrors(errors);
+      return;
+    }
+
+    // Limpiar errores y establecer nuevo debounce
+    setLocalErrors({});
+
+    debounceTimeoutRef.current = setTimeout(() => {
+      onSimulate(input);
+    }, DEBOUNCE_DELAY);
+
+    // Cleanup
+    return () => {
+      if (debounceTimeoutRef.current) {
+        clearTimeout(debounceTimeoutRef.current);
+      }
+    };
+  }, [investment, costPercent, dailyOrders, averageTicket]);
+
   const handleChange = (setter: Dispatch<SetStateAction<number>>, value: number) => {
     setter(value);
-    setHasChanged(true);
-    setLocalErrors({});
   };
 
   const handleSimulate = () => {
@@ -72,7 +113,6 @@ export function InvestmentControls({
 
     setLocalErrors({});
     onSimulate(input);
-    setHasChanged(false);
   };
 
   const handleReset = () => {
@@ -80,7 +120,6 @@ export function InvestmentControls({
     setCostPercent(20);
     setDailyOrders(50);
     setAverageTicket(10000);
-    setHasChanged(false);
   };
 
   const controls = [
@@ -147,7 +186,7 @@ export function InvestmentControls({
                   {hasError && <span className="simulator-control-required">*</span>}
                 </strong>
                 <span
-                  className={`simulator-control-value ${hasError ? 'has-error' : hasChanged ? 'is-dirty' : ''}`}
+                  className={`simulator-control-value ${hasError ? 'has-error' : ''}`}
                 >
                   {control.value}
                 </span>
@@ -185,17 +224,10 @@ export function InvestmentControls({
 
       <div className="simulator-controls-actions">
         <button
-          onClick={handleSimulate}
-          disabled={isLoading || hasErrors}
-          className={`simulator-action-button primary ${isLoading || hasErrors ? 'is-disabled' : ''}`}
-          title={hasErrors ? 'Corrige los errores de validación' : ''}
-        >
-          {isLoading ? '⏳ Simulando...' : '▶ Ejecutar Simulación'}
-        </button>
-        <button
           onClick={handleReset}
           disabled={isLoading}
           className={`simulator-action-button secondary ${isLoading ? 'is-disabled' : ''}`}
+          title="Restaurar valores por defecto"
         >
           ↻ Reset
         </button>
@@ -207,9 +239,9 @@ export function InvestmentControls({
         </div>
       )}
 
-      {hasChanged && !hasErrors && (
+      {!hasErrors && (
         <div className="simulator-change-message">
-          ⚡ Los parámetros cambiaron - haz clic en "Ejecutar Simulación" para actualizar
+          ⚡ Los cálculos se actualizan automáticamente cuando cambias los valores
         </div>
       )}
 

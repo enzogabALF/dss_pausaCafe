@@ -1,8 +1,15 @@
 import type { Metadata } from 'next';
+import { Manrope } from 'next/font/google';
 import './globals.css';
 
+const manrope = Manrope({
+  subsets: ['latin'],
+  variable: '--font-manrope',
+  display: 'swap',
+});
+
 export const metadata: Metadata = {
-  title: 'Pausa Cafe DSS',
+  title: 'Pausa Cafe | DSS Ejecutivo',
   description: 'Sistema de soporte a la toma de decisiones para Pausa Cafe',
 };
 
@@ -13,7 +20,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="es">
-      <body>{children}</body>
+      <body className={manrope.variable}>{children}</body>
     </html>
   );
 }

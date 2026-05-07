@@ -1,12 +1,13 @@
 'use client';
 
-import { useState } from 'react';
-import { SimulationInput, SimulationResult } from '@/lib/simulation';
+import { useState, useCallback } from 'react';
+import { SimulationInput, SimulationResult, RiskAnalysis } from '@/lib/simulation';
+import { Header } from '../components/navigation/Header';
 import { Sidebar } from '../components/navigation/Sidebar';
 import { InvestmentControls } from '../components/simulator/InvestmentControls';
 import { RiskPanel } from '../components/simulator/RiskPanel';
 import { SimulatorResults } from '../components/simulator/SimulatorResults';
-import type { SavedScenario } from '../components/simulator/SimulatorResults';
+import type { SavedScenarioItem } from '../components/simulator/SavedScenariosPanel';
 
 export default function SimulatorPage() {
   const [result, setResult] = useState<SimulationResult | undefined>();
@@ -16,7 +17,7 @@ export default function SimulatorPage() {
   const [error, setError] = useState<string | null>(null);
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
 
-  const handleSimulate = async (input: SimulationInput) => {
+  const handleSimulate = useCallback(async (input: SimulationInput) => {
     setIsLoading(true);
     setError(null);
     setFieldErrors({});
@@ -51,9 +52,21 @@ export default function SimulatorPage() {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, []);
 
-  const handleLoadScenario = (scenario: SavedScenario) => {
+  const handleRisksChange = useCallback((newRisks: RiskAnalysis) => {
+    setResult(prevResult => {
+      if (prevResult) {
+        return {
+          ...prevResult,
+          risks: newRisks,
+        };
+      }
+      return prevResult;
+    });
+  }, []);
+
+  const handleLoadScenario = (scenario: SavedScenarioItem) => {
     setResult(scenario.result);
     setLastInput(scenario.input);
     setPresetInput(scenario.input);
@@ -66,20 +79,12 @@ export default function SimulatorPage() {
       <Sidebar />
 
       <section className="dashboard-shell">
-        <header className="dashboard-header">
-          <div>
-            <p className="dashboard-kicker">CafeDecide • Pausa Cafe</p>
-            <h1>Simulador de Inversión</h1>
-            <p className="dashboard-subtitle">
-              Evalúa VAN, TIR, payback y riesgos antes de tomar una decisión.
-            </p>
-          </div>
+        <Header
+          title="Simulador de Inversión"
+          subtitle="Evalúa VAN, TIR, payback y riesgos antes de tomar una decisión."
+        />
 
-          <div className="dashboard-header-actions">
-            <span className="status-pill">Última actualización: Hoy, 14:30</span>
-            {error && <span className="simulator-error-pill">{error}</span>}
-          </div>
-        </header>
+        {error && <div className="simulator-validation-message">⚠️ Error: {error}</div>}
 
         <section className="simulator-layout">
           <InvestmentControls
@@ -95,7 +100,11 @@ export default function SimulatorPage() {
             risks={result?.risks}
             onLoadScenario={handleLoadScenario}
           />
-          <RiskPanel risks={result?.risks} />
+          <RiskPanel 
+            risks={result?.risks}
+            onRisksChange={handleRisksChange}
+            isLoading={isLoading}
+          />
         </section>
       </section>
     </main>

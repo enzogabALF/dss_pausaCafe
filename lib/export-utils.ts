@@ -172,7 +172,7 @@ export async function exportResultsAsPDF(
     // Viabilidad
     const isViable = result.normal.van > 0;
     doc.setFontSize(12);
-    doc.text(`VIABILIDAD: ${isViable ? '✓ VIABLE' : '✗ NO VIABLE'}`, 20, yPosition);
+    doc.text(`VIABILIDAD: ${isViable ? 'VIABLE' : 'NO VIABLE'}`, 20, yPosition);
 
     // Descargar
     doc.save(`simulacion-${new Date().getTime()}.pdf`);

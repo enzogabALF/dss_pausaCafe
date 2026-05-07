@@ -1918,6 +1918,16 @@ eval("// This regex will have fast negatives meaning valid identifiers may not p
 
 /***/ }),
 
+/***/ "(rsc)/./node_modules/next/font/google/target.css?{\"path\":\"app\\\\layout.tsx\",\"import\":\"Manrope\",\"arguments\":[{\"subsets\":[\"latin\"],\"variable\":\"--font-manrope\",\"display\":\"swap\"}],\"variableName\":\"manrope\"}":
+/*!**********************************************************************************************************************************************************************************************************!*\
+  !*** ./node_modules/next/font/google/target.css?{"path":"app\\layout.tsx","import":"Manrope","arguments":[{"subsets":["latin"],"variable":"--font-manrope","display":"swap"}],"variableName":"manrope"} ***!
+  \**********************************************************************************************************************************************************************************************************/
+/***/ ((module) => {
+
+eval("// Exports\nmodule.exports = {\n\t\"style\": {\"fontFamily\":\"'Manrope', 'Manrope Fallback'\",\"fontStyle\":\"normal\"},\n\t\"className\": \"__className_73ee6c\",\n\t\"variable\": \"__variable_73ee6c\"\n};\n//# sourceURL=[module]\n//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiKHJzYykvLi9ub2RlX21vZHVsZXMvbmV4dC9mb250L2dvb2dsZS90YXJnZXQuY3NzP3tcInBhdGhcIjpcImFwcFxcXFxsYXlvdXQudHN4XCIsXCJpbXBvcnRcIjpcIk1hbnJvcGVcIixcImFyZ3VtZW50c1wiOlt7XCJzdWJzZXRzXCI6W1wibGF0aW5cIl0sXCJ2YXJpYWJsZVwiOlwiLS1mb250LW1hbnJvcGVcIixcImRpc3BsYXlcIjpcInN3YXBcIn1dLFwidmFyaWFibGVOYW1lXCI6XCJtYW5yb3BlXCJ9IiwibWFwcGluZ3MiOiJBQUFBO0FBQ0E7QUFDQSxXQUFXLGtFQUFrRTtBQUM3RTtBQUNBO0FBQ0EiLCJzb3VyY2VzIjpbIkM6XFxVc2Vyc1xcVXN1YXJpb1xcT25lRHJpdmVcXERlc2t0b3BcXG1hcnRlcmlhcyAyMDI2XFxpbmdlbmllcmlhIGVuIHNvZnR3YXJlIElJSVxcZHNzXFxkc3NfcGF1c2FDYWZlXFxub2RlX21vZHVsZXNcXG5leHRcXGZvbnRcXGdvb2dsZVxcdGFyZ2V0LmNzcz97XCJwYXRoXCI6XCJhcHBcXGxheW91dC50c3hcIixcImltcG9ydFwiOlwiTWFucm9wZVwiLFwiYXJndW1lbnRzXCI6W3tcInN1YnNldHNcIjpbXCJsYXRpblwiXSxcInZhcmlhYmxlXCI6XCItLWZvbnQtbWFucm9wZVwiLFwiZGlzcGxheVwiOlwic3dhcFwifV0sXCJ2YXJpYWJsZU5hbWVcIjpcIm1hbnJvcGVcIn18cnNjIl0sInNvdXJjZXNDb250ZW50IjpbIi8vIEV4cG9ydHNcbm1vZHVsZS5leHBvcnRzID0ge1xuXHRcInN0eWxlXCI6IHtcImZvbnRGYW1pbHlcIjpcIidNYW5yb3BlJywgJ01hbnJvcGUgRmFsbGJhY2snXCIsXCJmb250U3R5bGVcIjpcIm5vcm1hbFwifSxcblx0XCJjbGFzc05hbWVcIjogXCJfX2NsYXNzTmFtZV83M2VlNmNcIixcblx0XCJ2YXJpYWJsZVwiOiBcIl9fdmFyaWFibGVfNzNlZTZjXCJcbn07XG4iXSwibmFtZXMiOltdLCJpZ25vcmVMaXN0IjpbMF0sInNvdXJjZVJvb3QiOiIifQ==\n//# sourceURL=webpack-internal:///(rsc)/./node_modules/next/font/google/target.css?{\"path\":\"app\\\\layout.tsx\",\"import\":\"Manrope\",\"arguments\":[{\"subsets\":[\"latin\"],\"variable\":\"--font-manrope\",\"display\":\"swap\"}],\"variableName\":\"manrope\"}\n");
+
+/***/ }),
+
 /***/ "(ssr)/./node_modules/next/dist/api/navigation.js":
 /*!**************************************************!*\
   !*** ./node_modules/next/dist/api/navigation.js ***!

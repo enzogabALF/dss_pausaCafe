@@ -31,7 +31,7 @@ export function generateAlerts(kpi: KpiData, operations: OperationsSnapshot): Al
         `El margen actual es ${kpi.margin.toFixed(1)}%, por debajo del umbral recomendado.`,
         'critical',
         'Rentabilidad',
-        'Desfavorable',
+        'unfavorable',
         true,
         'margin',
       )
@@ -45,7 +45,7 @@ export function generateAlerts(kpi: KpiData, operations: OperationsSnapshot): Al
         `La ocupación actual es ${kpi.occupancyRate.toFixed(1)}% y puede generar cuellos de botella.`,
         'warning',
         'Operaciones',
-        'Normal',
+        'normal',
         true,
         'occupancy',
       )
@@ -59,7 +59,7 @@ export function generateAlerts(kpi: KpiData, operations: OperationsSnapshot): Al
         `Hay ${operations.criticalItems} insumos por debajo del mínimo de reposición.`,
         'critical',
         'Inventario',
-        'Desfavorable',
+        'unfavorable',
         true,
         'inventory',
       )
@@ -73,7 +73,7 @@ export function generateAlerts(kpi: KpiData, operations: OperationsSnapshot): Al
         `La utilización operativa está en ${operations.capacityUtilization.toFixed(1)}% y conviene reforzar turnos.`,
         'warning',
         'Personal',
-        'Normal',
+        'normal',
         true,
         'capacity',
       )
@@ -87,7 +87,7 @@ export function generateAlerts(kpi: KpiData, operations: OperationsSnapshot): Al
         `Las ventas digitales están en ${kpi.digitalSales.toFixed(1)}%. Hay espacio para mejorar el canal.`,
         'info',
         'Ventas',
-        'Favorable',
+        'favorable',
         false,
         'digital-sales',
       )
@@ -101,7 +101,7 @@ export function generateAlerts(kpi: KpiData, operations: OperationsSnapshot): Al
         'Los KPIs actuales no muestran alertas críticas.',
         'info',
         'Estado general',
-        'Favorable',
+        'favorable',
         false,
         'stable',
       )
